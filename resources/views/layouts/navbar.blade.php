@@ -1,116 +1,196 @@
 {{-- ══════════════════════════════════════════════════
-     MAIN NAVBAR
+     SITE HEADER WRAPPER  (sticky, two rows)
 ══════════════════════════════════════════════════ --}}
-<nav class="pf-topnav" id="mainNav">
-    <div class="container">
-        <div class="pf-topnav__inner">
+<header class="pf-site-header" id="siteHeader">
 
-            {{-- Brand --}}
-            <a class="pf-brand" href="{{ url('/') }}">
-                <img src="/images/logo.jpg" alt="{{ config('app.name') }}" style="height:38px;" class="me-2">
-                <span>{{ config('app.name', 'Wellness') }}</span>
-            </a>
+    {{-- ── ROW 1: TOP BAR ──────────────────────────────── --}}
+    <div class="pf-topbar">
+        <div class="container">
+            <div class="pf-topbar__inner">
 
-            {{-- Right: auth links --}}
-            <div class="pf-topnav__right d-none d-lg-flex align-items-center gap-3">
-                @auth
-                    <div class="dropdown">
-                        <a class="pf-util-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="me-1" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4"/></svg>
-                            {{ auth()->user()->firstname }}
+                {{-- Brand / Logo --}}
+                <a class="pf-brand" href="{{ url('/') }}" id="brandLogo">
+                    <img src="/images/logo.jpg" alt="{{ config('app.name') }}" style="height:38px;" class="me-2">
+                    <span>{{ config('app.name', 'Wellness') }}</span>
+                </a>
+
+                {{-- Search bar (center) --}}
+                <form class="pf-search" action="{{ url('/search') }}" method="GET" role="search" id="siteSearchForm">
+                    <input
+                        class="pf-search__input"
+                        type="search"
+                        name="q"
+                        id="siteSearchInput"
+                        placeholder="Search products, articles, tips…"
+                        value="{{ request('q') }}"
+                        autocomplete="off"
+                        aria-label="Site search"
+                    >
+                    <button class="pf-search__btn" type="submit" id="siteSearchBtn" aria-label="Search">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11"/>
+                        </svg>
+                        <span class="pf-search__btn-label">Search</span>
+                    </button>
+                </form>
+
+                {{-- Right: utility links --}}
+                <div class="pf-topbar__right" id="topbarRight">
+
+                    @auth
+                        {{-- Logged-in: first name + dropdown --}}
+                        <div class="dropdown pf-user-dropdown" id="userDropdownWrap">
+                            <a class="pf-util-link pf-util-link--user dropdown-toggle"
+                               href="#"
+                               id="userDropdownToggle"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="pf-util-icon" viewBox="0 0 16 16">
+                                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4"/>
+                                </svg>
+                                <span class="pf-util-link__label">{{ auth()->user()->firstname }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end pf-user-menu shadow border-0 rounded-3" aria-labelledby="userDropdownToggle">
+                                <li class="pf-user-menu__header">
+                                    <span class="pf-user-menu__name">{{ auth()->user()->firstname }}</span>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item pf-user-menu__item" href="{{ route('profile.edit') }}" id="menuProfile">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4"/>
+                                        </svg>
+                                        Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item pf-user-menu__item" href="#" id="menuMyAccount">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                                            <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5z"/>
+                                        </svg>
+                                        My Account
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}" id="logoutForm">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item pf-user-menu__item pf-user-menu__item--danger" id="menuLogout">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-2" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                                                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                                            </svg>
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    @else
+                        {{-- Guest: Sign In --}}
+                        <a class="pf-util-link" href="{{ route('login') }}" id="signInLink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="pf-util-icon" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+                            </svg>
+                            <span class="pf-util-link__label">Sign In</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}">My Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item text-danger">Sign Out</button>
-                                </form>
-                            </li>
+                    @endauth
+
+                    {{-- Orders --}}
+                    <a class="pf-util-link" href="#" id="ordersLink">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" class="pf-util-icon" viewBox="0 0 16 16">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                        </svg>
+                        <span class="pf-util-link__label">Orders</span>
+                    </a>
+
+                    {{-- Cart --}}
+                    <a class="pf-util-link pf-util-link--cart" href="#" id="cartLink">
+                        <span class="pf-cart-wrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" class="pf-util-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+                            </svg>
+                            {{-- Uncomment and wire up when cart feature is ready --}}
+                            {{-- <span class="pf-cart-badge">0</span> --}}
+                        </span>
+                        <span class="pf-util-link__label">Cart</span>
+                    </a>
+
+                </div>{{-- /.pf-topbar__right --}}
+
+                {{-- Hamburger (mobile only) --}}
+                <button class="pf-toggler d-lg-none" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#mobileNav"
+                    aria-controls="mobileNav" aria-expanded="false" aria-label="Toggle navigation"
+                    id="mobileMenuToggle">
+                    <span></span><span></span><span></span>
+                </button>
+
+            </div>{{-- /.pf-topbar__inner --}}
+        </div>{{-- /.container --}}
+    </div>{{-- /.pf-topbar --}}
+
+    {{-- ── ROW 2: CATEGORY BAR (desktop only) ─────────── --}}
+    <div class="pf-catbar d-none d-lg-block" id="desktopCatBar">
+        <div class="container">
+            <ul class="pf-catbar__list list-unstyled mb-0 d-flex align-items-stretch justify-content-center">
+
+                {{-- Nutrition & Diet --}}
+                <li class="pf-cat-item dropdown">
+                    <a class="pf-cat-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                        Nutrition &amp; Diet
+                    </a>
+                    <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
+                        <p class="pf-megamenu__heading">Nutrition &amp; Diet</p>
+                        <ul class="list-unstyled">
+                            <li><a class="pf-megamenu__link" href="#">Diet Plans</a></li>
+                            <li><a class="pf-megamenu__link" href="#">Supplements</a></li>
+                            <li><a class="pf-megamenu__link" href="#">Healthy Eating</a></li>
                         </ul>
                     </div>
-                @else
-                    <a class="pf-util-link" href="{{ route('login') }}">Sign In</a>
-                    <a class="pf-util-link" href="{{ route('register') }}">Register</a>
-                @endauth
+                </li>
 
-                <a class="pf-util-link" href="{{ route('about') }}">About</a>
-                <a class="pf-util-link" href="{{ route('contact') }}">Contact</a>
-            </div>
+                {{-- Fitness & Movement --}}
+                <li class="pf-cat-item">
+                    <a class="pf-cat-link" href="#">Fitness &amp; Movement</a>
+                </li>
 
-            {{-- Hamburger (mobile only) --}}
-            <button class="pf-toggler d-lg-none" type="button"
-                data-bs-toggle="collapse" data-bs-target="#mobileNav"
-                aria-controls="mobileNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
+                {{-- Workouts --}}
+                <li class="pf-cat-item dropdown">
+                    <a class="pf-cat-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                        Workouts
+                    </a>
+                    <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
+                        <p class="pf-megamenu__heading">Workouts</p>
+                        <ul class="list-unstyled">
+                            <li><a class="pf-megamenu__link" href="#">Yoga &amp; Flexibility</a></li>
+                            <li><a class="pf-megamenu__link" href="#">Sports &amp; Outdoors</a></li>
+                            <li><a class="pf-megamenu__link" href="#">Gear &amp; Equipment</a></li>
+                        </ul>
+                    </div>
+                </li>
 
+                {{-- Yoga & Flexibility --}}
+                <li class="pf-cat-item">
+                    <a class="pf-cat-link" href="#">Yoga &amp; Flexibility</a>
+                </li>
+
+                {{-- Sports & Outdoors --}}
+                <li class="pf-cat-item">
+                    <a class="pf-cat-link" href="#">Sports &amp; Outdoors</a>
+                </li>
+
+                {{-- Gear & Equipment --}}
+                <li class="pf-cat-item">
+                    <a class="pf-cat-link" href="#">Gear &amp; Equipment</a>
+                </li>
+
+            </ul>
         </div>
-    </div>
-</nav>
+    </div>{{-- /.pf-catbar --}}
 
-{{-- ══════════════════════════════════════════════════
-     DESKTOP CATEGORY BAR  (ProFlowers style)
-     — plain <div>, always visible, no collapse
-══════════════════════════════════════════════════ --}}
-<div class="pf-catbar d-none d-lg-block" id="desktopCatBar">
-    <div class="container">
-        <ul class="pf-catbar__list list-unstyled mb-0 d-flex align-items-stretch justify-content-center">
-
-            {{-- Nutrition & Diet --}}
-            <li class="pf-cat-item dropdown">
-                <a class="pf-cat-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                    Nutrition &amp; Diet
-                </a>
-                <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
-                    <p class="pf-megamenu__heading">Nutrition &amp; Diet</p>
-                    <ul class="list-unstyled">
-                        <li><a class="pf-megamenu__link" href="#">Diet Plans</a></li>
-                        <li><a class="pf-megamenu__link" href="#">Supplements</a></li>
-                        <li><a class="pf-megamenu__link" href="#">Healthy Eating</a></li>
-                    </ul>
-                </div>
-            </li>
-
-            {{-- Fitness & Movement --}}
-            <li class="pf-cat-item">
-                <a class="pf-cat-link" href="#">Fitness &amp; Movement</a>
-            </li>
-
-            {{-- Workouts --}}
-            <li class="pf-cat-item dropdown">
-                <a class="pf-cat-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                    Workouts
-                </a>
-                <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
-                    <p class="pf-megamenu__heading">Workouts</p>
-                    <ul class="list-unstyled">
-                        <li><a class="pf-megamenu__link" href="#">Yoga &amp; Flexibility</a></li>
-                        <li><a class="pf-megamenu__link" href="#">Sports &amp; Outdoors</a></li>
-                        <li><a class="pf-megamenu__link" href="#">Gear &amp; Equipment</a></li>
-                    </ul>
-                </div>
-            </li>
-
-            {{-- Yoga & Flexibility --}}
-            <li class="pf-cat-item">
-                <a class="pf-cat-link" href="#">Yoga &amp; Flexibility</a>
-            </li>
-
-            {{-- Sports & Outdoors --}}
-            <li class="pf-cat-item">
-                <a class="pf-cat-link" href="#">Sports &amp; Outdoors</a>
-            </li>
-
-            {{-- Gear & Equipment --}}
-            <li class="pf-cat-item">
-                <a class="pf-cat-link" href="#">Gear &amp; Equipment</a>
-            </li>
-
-        </ul>
-    </div>
-</div>
+</header>{{-- /.pf-site-header --}}
 
 {{-- ══════════════════════════════════════════════════
      MOBILE FULL-SCREEN SIDE DRAWER
@@ -122,17 +202,30 @@
             <button class="btn-close" data-bs-toggle="collapse" data-bs-target="#mobileNav"></button>
         </div>
 
+        {{-- Mobile search --}}
+        <div class="pf-mobile-section px-3 pb-2">
+            <form class="pf-search pf-search--mobile" action="{{ url('/search') }}" method="GET" role="search">
+                <input class="pf-search__input" type="search" name="q" placeholder="Search…" value="{{ request('q') }}" autocomplete="off" aria-label="Site search">
+                <button class="pf-search__btn" type="submit" aria-label="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
         {{-- Main links --}}
         <div class="pf-mobile-section">
             <a class="pf-mobile-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">Home</a>
-            <a class="pf-mobile-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">About</a>
-            <a class="pf-mobile-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Contact</a>
+            <a class="pf-mobile-link" href="#">Orders</a>
+            <a class="pf-mobile-link" href="#">Cart</a>
             @guest
                 <a class="pf-mobile-link" href="{{ route('login') }}">Sign In</a>
                 <a class="pf-mobile-link" href="{{ route('register') }}">Register</a>
             @endguest
             @auth
-                <a class="pf-mobile-link" href="{{ route('profile.edit') }}">My Profile</a>
+                <a class="pf-mobile-link" href="{{ route('profile.edit') }}">Profile</a>
+                <a class="pf-mobile-link" href="#">My Account</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button class="pf-mobile-link text-danger w-100 text-start border-0 bg-transparent">Sign Out</button>
@@ -184,390 +277,4 @@
     </div>
 </div>
 
-@push('styles')
-<style>
-/* ═══════════════════════════════════════════════════
-   FONT  — Playfair Display (headlines) + Inter (body)
-   mirrors ProFlowers' serif + clean sans combination
-═══════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
-
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    color: #1a1a1a;
-}
-
-h1, h2, h3, h4, h5 {
-    font-family: 'Playfair Display', serif;
-}
-
-/* ═══════════════════════════════════════════════════
-   TOP NAVBAR
-═══════════════════════════════════════════════════ */
-.pf-topnav {
-    background: #f9f6f2;
-    border-bottom: 1px solid #ede9e4;
-    padding: .6rem 0;
-    position: sticky;
-    top: 0;
-    z-index: 1030;
-}
-
-.pf-topnav__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.pf-brand {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.45rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    letter-spacing: -.01em;
-}
-.pf-brand:hover { color: #1a6644; }
-
-.pf-util-link {
-    font-size: .82rem;
-    font-weight: 500;
-    color: #444;
-    text-decoration: none;
-    transition: color .18s;
-}
-.pf-util-link:hover { color: #1a6644; }
-.pf-util-link.dropdown-toggle::after { border-top-color: #444; }
-
-/* Hamburger */
-.pf-toggler {
-    background: none;
-    border: none;
-    padding: 6px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-.pf-toggler span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: #1a1a1a;
-    border-radius: 2px;
-    transition: all .25s;
-}
-
-/* ═══════════════════════════════════════════════════
-   DESKTOP CATEGORY BAR  (ProFlowers style)
-   — cream/offwhite background, plain text links,
-     subtle bottom-border hover underline
-═══════════════════════════════════════════════════ */
-.pf-catbar {
-    background: #f9f6f2;
-    border-bottom: 1px solid #ddd9d4;
-}
-
-.pf-catbar__list {
-    gap: 0;
-    min-height: 48px;
-}
-
-.pf-cat-item {
-    display: flex;
-    align-items: stretch;
-}
-
-.pf-cat-link {
-    display: flex;
-    align-items: center;
-    font-family: 'Inter', sans-serif;
-    font-size: .875rem;
-    font-weight: 500;
-    color: #1a1a1a;
-    text-decoration: none;
-    padding: 0 1.1rem;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: color .18s, border-color .18s;
-    background: none;
-}
-
-.pf-cat-link:hover,
-.pf-cat-item.dropdown.show > .pf-cat-link {
-    color: #1a6644;
-    border-bottom-color: #1a6644;
-}
-
-.pf-cat-link.dropdown-toggle::after {
-    margin-left: .35em;
-    vertical-align: .18em;
-    border-top-color: currentColor;
-}
-
-/* Mega menu panel */
-.pf-megamenu {
-    border-radius: .5rem;
-    min-width: 200px;
-    margin-top: 0 !important;
-    border-top: 2px solid #1a6644 !important;
-}
-
-.pf-megamenu__heading {
-    font-family: 'Playfair Display', serif;
-    font-size: .95rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: .5rem;
-    padding-bottom: .4rem;
-    border-bottom: 1px solid #eee;
-}
-
-.pf-megamenu__link {
-    display: block;
-    font-size: .84rem;
-    font-weight: 400;
-    color: #444;
-    text-decoration: none;
-    padding: .35rem 0;
-    transition: color .15s;
-}
-.pf-megamenu__link:hover { color: #1a6644; }
-
-/* ═══════════════════════════════════════════════════
-   MOBILE DRAWER
-═══════════════════════════════════════════════════ */
-.pf-mobile-drawer {
-    background: #fff;
-    border-bottom: 1px solid #dee2e6;
-    box-shadow: 0 4px 16px rgba(0,0,0,.08);
-}
-
-.pf-mobile-drawer__header {
-    border-bottom: 1px solid #f0ede8;
-}
-
-.pf-mobile-section {
-    padding: .5rem .75rem;
-}
-
-.pf-mobile-divider {
-    height: 1px;
-    background: #f0ede8;
-    margin: .25rem 0;
-}
-
-.pf-mobile-section-label {
-    font-size: .68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .09em;
-    color: #9ca3af;
-    margin: .5rem 0 .25rem;
-}
-
-/* Main nav links inside mobile drawer */
-.pf-mobile-link {
-    display: block;
-    font-size: .93rem;
-    font-weight: 500;
-    color: #1a1a1a;
-    text-decoration: none;
-    padding: .55rem .75rem;
-    border-radius: .4rem;
-    transition: background .15s, color .15s;
-}
-.pf-mobile-link:hover,
-.pf-mobile-link.active { background: #f0f9f4; color: #1a6644; }
-
-/* Category links in mobile drawer */
-.pf-mobile-cat-link {
-    display: block;
-    font-size: .9rem;
-    font-weight: 400;
-    color: #374151;
-    text-decoration: none;
-    padding: .5rem .75rem;
-    border-radius: .35rem;
-    transition: background .15s;
-}
-.pf-mobile-cat-link:hover { background: #f0f9f4; color: #1a6644; }
-
-.pf-mobile-cat-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: .9rem;
-    font-weight: 400;
-    color: #374151;
-    padding: .5rem .75rem;
-    border-radius: .35rem;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-}
-.pf-mobile-cat-toggle:hover { background: #f0f9f4; color: #1a6644; }
-
-.pf-chevron {
-    transition: transform .22s ease;
-    flex-shrink: 0;
-}
-.pf-mobile-cat-toggle[aria-expanded="true"] .pf-chevron {
-    transform: rotate(90deg);
-}
-
-.pf-mobile-subcats {
-    padding-left: 1rem;
-    border-left: 2px solid #c7e8d5;
-    margin: .15rem 0 .15rem 1rem;
-}
-
-.pf-mobile-sublink {
-    display: block;
-    font-size: .84rem;
-    color: #4b5563;
-    text-decoration: none;
-    padding: .35rem .5rem;
-    border-radius: .3rem;
-    transition: background .15s, color .15s;
-}
-.pf-mobile-sublink:hover { background: #e9f7ef; color: #1a6644; }
-
-/* ═══════════════════════════════════════════════════
-   BANNER SECTION
-═══════════════════════════════════════════════════ */
-.banner-section {
-    padding: 1rem 0 1.5rem;
-}
-
-.banner-carousel-wrap,
-.banner-right-wrap {
-    height: 300px;
-    border-radius: .6rem;
-    overflow: hidden;
-}
-
-.banner-carousel-wrap .carousel,
-.banner-carousel-wrap .carousel-inner,
-.banner-carousel-wrap .carousel-item {
-    height: 100%;
-}
-
-.banner-carousel-wrap .carousel-item img {
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-}
-
-/* Carousel controls */
-.banner-carousel-wrap .carousel-control-prev,
-.banner-carousel-wrap .carousel-control-next {
-    width: 40px;
-    height: 40px;
-    background: rgba(255,255,255,.85);
-    border-radius: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 1;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
-}
-.banner-carousel-wrap .carousel-control-prev { left: 12px; }
-.banner-carousel-wrap .carousel-control-next { right: 12px; }
-
-.banner-carousel-wrap .carousel-control-prev-icon,
-.banner-carousel-wrap .carousel-control-next-icon {
-    filter: invert(1) grayscale(1) brightness(0);
-    width: 16px;
-    height: 16px;
-}
-
-.banner-carousel-wrap .carousel-indicators [data-bs-target] {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.7);
-    border: none;
-}
-.banner-carousel-wrap .carousel-indicators .active {
-    background: #fff;
-}
-
-/* Right banner */
-.banner-right-wrap {
-    position: relative;
-    background: linear-gradient(135deg, #1a7f5a 0%, #0d5c3f 60%, #0a4531 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 1.5rem;
-    color: #fff;
-}
-
-.banner-right-wrap img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: .35;
-}
-
-.banner-right-wrap .banner-right-content {
-    position: relative;
-    z-index: 1;
-}
-
-.banner-right-wrap .banner-right-badge {
-    display: inline-block;
-    background: rgba(255,255,255,.2);
-    border: 1px solid rgba(255,255,255,.4);
-    border-radius: 2rem;
-    font-size: .7rem;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    padding: .25rem .85rem;
-    margin-bottom: .75rem;
-}
-
-.banner-right-wrap h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.25;
-    margin-bottom: .5rem;
-    color: #fff;
-}
-
-.banner-right-wrap p {
-    font-size: .82rem;
-    opacity: .85;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-
-.banner-right-wrap .btn-banner {
-    background: #fff;
-    color: #1a6644;
-    font-size: .8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    padding: .5rem 1.4rem;
-    border-radius: 2rem;
-    text-decoration: none;
-    transition: background .2s, color .2s;
-}
-.banner-right-wrap .btn-banner:hover {
-    background: #f0faf5;
-    color: #0f4a2e;
-}
-</style>
-@endpush
+{{-- All CSS is in layouts/header.blade.php --}}

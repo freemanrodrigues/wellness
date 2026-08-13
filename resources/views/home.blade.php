@@ -4,7 +4,98 @@
 @section('meta_description', $meta['description'])
 
 @section('content')
+    {{-- ══════════════════════════════════════════════
+    BANNER SECTION — carousel (66%) + right promo (34%)
+    ══════════════════════════════════════════════ --}}
+    <div class="banner-section">
+        <div class="row g-3 align-items-stretch">
 
+            {{-- LEFT: Carousel — 66% --}}
+            <div class="col-12 col-lg-8">
+                <div class="banner-carousel-wrap">
+                    <div id="heroBannerCarousel" class="carousel slide h-100" data-bs-ride="carousel"
+                        data-bs-interval="4000">
+
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#heroBannerCarousel" data-bs-slide-to="0" class="active"
+                                aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#heroBannerCarousel" data-bs-slide-to="1"
+                                aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#heroBannerCarousel" data-bs-slide-to="2"
+                                aria-label="Slide 3"></button>
+                        </div>
+
+                        <div class="carousel-inner h-100 rounded-3 overflow-hidden">
+
+                            {{-- Slide 1 --}}
+                            <div class="carousel-item active h-100">
+                                <img src="{{ asset('images/banner_slide1.png') }}" alt="Fitness & Wellness">
+                                <div class="carousel-caption d-none d-md-block text-start"
+                                    style="left:5%;right:auto;bottom:1.5rem;">
+                                    <span class="banner-slide-badge">New Season</span>
+                                    <h2 class="banner-slide-title">Move. Feel. Thrive.</h2>
+                                    <p class="banner-slide-sub">Explore our fitness & movement collection</p>
+                                    <a href="#" class="btn-slide-cta">Shop Now</a>
+                                </div>
+                            </div>
+
+                            {{-- Slide 2 --}}
+                            <div class="carousel-item h-100">
+                                <img src="{{ asset('images/banner_slide2.png') }}" alt="Nutrition & Diet">
+                                <div class="carousel-caption d-none d-md-block text-start"
+                                    style="left:5%;right:auto;bottom:1.5rem;">
+                                    <span class="banner-slide-badge">Nutrition</span>
+                                    <h2 class="banner-slide-title">Eat Well, Live Well.</h2>
+                                    <p class="banner-slide-sub">Discover diet plans & supplements</p>
+                                    <a href="#" class="btn-slide-cta">Explore</a>
+                                </div>
+                            </div>
+
+                            {{-- Slide 3 --}}
+                            <div class="carousel-item h-100">
+                                <img src="{{ asset('images/banner_slide3.png') }}" alt="Yoga & Flexibility">
+                                <div class="carousel-caption d-none d-md-block text-start"
+                                    style="left:5%;right:auto;bottom:1.5rem;">
+                                    <span class="banner-slide-badge">Mindfulness</span>
+                                    <h2 class="banner-slide-title">Find Your Balance.</h2>
+                                    <p class="banner-slide-sub">Yoga, meditation & flexibility training</p>
+                                    <a href="#" class="btn-slide-cta">Learn More</a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {{-- Controls --}}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#heroBannerCarousel"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#heroBannerCarousel"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- RIGHT: Promo Banner — 34% --}}
+            <div class="col-12 col-lg-4">
+                <div class="banner-right-wrap">
+                    <img src="{{ asset('images/banner_right.png') }}" alt="Special Offer">
+                    <div class="banner-right-content">
+                        <span class="banner-right-badge">Limited Time</span>
+                        <h3>Start Your Wellness Journey</h3>
+                        <p>Get personalised plans for nutrition, fitness & mindfulness — tailored just for you.</p>
+                        <a href="{{ route('register') }}" class="btn-banner">Get Started</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    {{-- /banner section --}}
     @foreach($productRows as $rowIndex => $row)
         <section class="mb-5">
             <div class="d-flex justify-content-between align-items-center mb-3">

@@ -16,7 +16,11 @@ class PasswordResetLinkController extends Controller
      */
     public function create(): View
     {
-        return view('auth.forgot-password');
+        $meta = [
+            'title' => 'Forgot Passsword',
+            'description' => 'Reset your account password.',
+        ];
+        return view('auth.forgot-password', ['meta' => $meta]);
     }
 
     /**
@@ -38,8 +42,8 @@ class PasswordResetLinkController extends Controller
         );
 
         return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+            ? back()->with('status', __($status))
+            : back()->withInput($request->only('email'))
+                ->withErrors(['email' => __($status)]);
     }
 }

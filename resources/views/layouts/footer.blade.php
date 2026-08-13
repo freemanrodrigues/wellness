@@ -1,16 +1,32 @@
-<footer class="bg-dark text-white-50 py-4 mt-5">
+<footer class="pf-footer" id="siteFooter">
     <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <p class="mb-0">&copy; {{ date('Y') }} {{ config('app.name', 'Laravel') }}. All rights reserved.</p>
+        <div class="pf-footer__inner">
+
+            {{-- Brand & copyright --}}
+            <div class="pf-footer__brand">
+                <a class="pf-footer__logo" href="{{ url('/') }}">
+                    <img src="/images/logo.jpg" alt="{{ config('app.name') }}" style="height:32px;" class="me-2">
+                    <span>{{ config('app.name', 'Wellness') }}</span>
+                </a>
+                <p class="pf-footer__copy">&copy; {{ date('Y') }} {{ config('app.name', 'Wellness') }}. All rights reserved.</p>
             </div>
-            <div class="col-md-6 text-md-end">
-                <a href="{{ route('privacy') }}" class="text-white-50 text-decoration-none me-3">Privacy Policy</a>
-                <a href="{{ route('terms') }}" class="text-white-50 text-decoration-none">Terms of Service</a>
-            </div>
+
+            {{-- Footer links --}}
+            <nav class="pf-footer__nav" aria-label="Footer navigation">
+                <a href="{{ route('about') }}" class="pf-footer__link" id="footerAbout">About</a>
+                <span class="pf-footer__sep" aria-hidden="true">&middot;</span>
+                <a href="{{ route('contact') }}" class="pf-footer__link" id="footerContact">Contact</a>
+                <span class="pf-footer__sep" aria-hidden="true">&middot;</span>
+                <a href="{{ route('privacy') }}" class="pf-footer__link" id="footerPrivacy">Privacy Policy</a>
+                <span class="pf-footer__sep" aria-hidden="true">&middot;</span>
+                <a href="{{ route('terms') }}" class="pf-footer__link" id="footerTerms">Terms of Service</a>
+            </nav>
+
         </div>
     </div>
 </footer>
+
+{{-- Footer styles are in layouts/header.blade.php --}}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"
     integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
