@@ -3,11 +3,13 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\CategoryController;
+use App\Http\Controllers\Dashboard\BrandController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\CheckoutController;
+
 
 Route::get('/test', [MainController::class, 'test'])->name('test');
 
@@ -72,7 +74,10 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::resource('products', ProductController::class);
         Route::resource('category', CategoryController::class);
         Route::post('category/{id}/restore', [CategoryController::class, 'restore'])->name('category.restore');
+        Route::resource('brand', BrandController::class);
+        Route::post('brand/{id}/restore', [BrandController::class, 'restore'])->name('brand.restore');
     });
+
 
 
 

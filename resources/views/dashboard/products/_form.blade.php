@@ -179,12 +179,25 @@
             @error('subcat_id') <div class="dash-form-error">{{ $message }}</div> @enderror
         </div>
 
-        <div class="col-md-2">
-            <label class="dash-form-label" for="brand_id">Brand ID</label>
-            <input type="number" class="dash-form-input" name="brand_id" id="brand_id"
-                   value="{{ old('brand_id', $product->brand_id ?? '') }}">
+        <div class="col-md-3">
+            <label class="dash-form-label" for="brand_id">Brand</label>
+            <select class="dash-form-select @error('brand_id') is-invalid @enderror" name="brand_id" id="brand_id">
+                <option value="">Select Brand</option>
+                @php
+                    $brandList = isset($brands) && (is_countable($brands) ? count($brands) > 0 : !empty($brands))
+                        ? $brands
+                        : \App\Models\Brand::where('status', true)->orderBy('sort_order')->orderBy('name')->get();
+                @endphp
+                @foreach($brandList as $brandItem)
+                    <option value="{{ $brandItem->id }}" {{ old('brand_id', $product->brand_id ?? '') == $brandItem->id ? 'selected' : '' }}>
+                        {{ $brandItem->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('brand_id') <div class="dash-form-error">{{ $message }}</div> @enderror
         </div>
     </div>
+
 
     {{-- ── SEO ──────────────────────────────────────────────── --}}
     <p class="dash-form-section">SEO</p>

@@ -2,9 +2,11 @@
 /* ─── Dashboard Layout ──────────────────────────────── */
 .dash-wrapper {
     display: flex;
-    min-height: calc(100vh - 96px);
+    min-height: calc(100vh - 105px);
     background: #f5f6fa;
+    padding-top: 105px;
 }
+
 
 .dash-sidebar {
     width: 230px;

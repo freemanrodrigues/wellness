@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Brand;
 use App\Models\Product;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,8 +48,11 @@ class ProductController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('dashboard.products.create', compact('categories'));
+        $brands = Brand::where('status', true)->orderBy('sort_order')->orderBy('name')->get();
+
+        return view('dashboard.products.create', compact('categories', 'brands'));
     }
+
 
     /**
      * Store a newly created product in the database.
@@ -382,6 +387,8 @@ $updatedCount++;
             ->orderBy('name')
             ->get();
 
+        $brands = Brand::where('status', true)->orderBy('sort_order')->orderBy('name')->get();
+
         $selectedCatId = old('cat_id', $product->cat_id);
         $subcategories = collect();
         if ($selectedCatId) {
@@ -390,8 +397,9 @@ $updatedCount++;
                 ->get();
         }
 
-        return view('dashboard.products.edit', compact('product', 'categories', 'subcategories'));
+        return view('dashboard.products.edit', compact('product', 'categories', 'subcategories', 'brands'));
     }
+
 
     /**
      * AJAX endpoint to retrieve subcategories for a given parent category ID.
