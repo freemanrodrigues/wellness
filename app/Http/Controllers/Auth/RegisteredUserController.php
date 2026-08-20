@@ -20,12 +20,38 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
+        $countries = \Illuminate\Support\Facades\DB::table('countries')
+            ->where('active', 1)
+            ->orderBy('countryname')
+            ->pluck('countryname', 'id');
+
+        if ($countries->isEmpty()) {
+            $countries = collect([
+                1 => 'India',
+                2 => 'United States',
+                3 => 'United Kingdom',
+                4 => 'Canada',
+                5 => 'Australia',
+                6 => 'United Arab Emirates',
+                7 => 'Singapore',
+            ]);
+        }
+
+        $nav = \App\Models\Category::getTopCategoriesWithSubcategories();
+
         $meta = [
             'title' => 'Register',
             'description' => 'Create a new account on ' . config('app.name') . '.',
         ];
-        return view('auth.register', ['meta' => $meta]);
+
+        return view('auth.register', [
+            'meta' => $meta,
+            'countries' => $countries,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
+        ]);
     }
+
 
     /**
      * Handle an incoming registration request.

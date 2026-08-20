@@ -166,31 +166,39 @@
                                 <select id="country_id" name="country_id"
                                     class="form-select @error('country_id') is-invalid @enderror">
                                     <option value="">-- Select Country --</option>
-                                    <option value="1"  {{ old('country_id') == 1  ? 'selected' : '' }}>India</option>
-                                    <option value="2"  {{ old('country_id') == 2  ? 'selected' : '' }}>United States</option>
-                                    <option value="3"  {{ old('country_id') == 3  ? 'selected' : '' }}>United Kingdom</option>
-                                    <option value="4"  {{ old('country_id') == 4  ? 'selected' : '' }}>Canada</option>
-                                    <option value="5"  {{ old('country_id') == 5  ? 'selected' : '' }}>Australia</option>
-                                    <option value="6"  {{ old('country_id') == 6  ? 'selected' : '' }}>UAE</option>
-                                    <option value="7"  {{ old('country_id') == 7  ? 'selected' : '' }}>Singapore</option>
+                                    @php
+                                        $countriesList = isset($countries) && (is_countable($countries) ? count($countries) > 0 : !empty($countries))
+                                            ? $countries
+                                            : \Illuminate\Support\Facades\DB::table('countries')->where('active', 1)->orderBy('countryname')->pluck('countryname', 'id');
+                                    @endphp
+                                    @foreach ($countriesList as $cId => $cName)
+                                        <option value="{{ $cId }}" {{ old('country_id') == $cId ? 'selected' : '' }}>
+                                            {{ $cName }}
+                                        </option>
+                                    @endforeach
                                 </select>
                                 @error('country_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
+
                         </div>
 
-                        <div class="d-flex align-items-center justify-content-between mt-4 pt-2 border-top">
-                            <a href="{{ route('login') }}" class="small text-decoration-underline text-muted">
-                                {{ __('Already registered?') }}
-                            </a>
+                        <div class="d-flex align-items-center justify-content-between mt-4 pt-3 border-top">
+                            <div>
+                                <span class="text-muted small">Already a registered user?</span>
+                                <a href="{{ route('login') }}" class="small fw-bold text-decoration-none text-primary ms-1">
+                                    Log in here
+                                </a>
+                            </div>
 
-                            <button type="submit" class="btn btn-primary px-4">
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
                                 {{ __('Register') }}
                             </button>
                         </div>
                     </form>
+
 
                 </div>
             </div>
