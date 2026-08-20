@@ -69,8 +69,16 @@
                         </div>
                     </form>
 
+                    <div class="mt-4 text-center pt-3 border-top">
+                        <span class="text-muted small">Not a registered user?</span>
+                        <a href="{{ route('register') }}" class="small fw-bold text-decoration-none text-primary ms-1">
+                            Register here
+                        </a>
+                    </div>
+
                 </div>
             </div>
+
 
         </div>
     </div>

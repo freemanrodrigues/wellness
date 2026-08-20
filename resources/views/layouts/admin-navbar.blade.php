@@ -148,8 +148,13 @@
                     <i class="bi bi-plus-circle text-success"></i>
                     <div><span>Add Products</span><small>Create a new listing</small></div>
                 </a>
+                <a href="{{ route('dashboard.products.import') }}" class="admin-mainnav__dd-item">
+                    <i class="bi bi-file-earmark-spreadsheet text-info"></i>
+                    <div><span>Import CSV</span><small>Upload products via CSV</small></div>
+                </a>
             </div>
         </div>
+
 
         {{-- Vendors (no dropdown for now) --}}
         <a href="#" class="admin-mainnav__item">

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class Category extends Model
 {
@@ -29,10 +30,10 @@ class Category extends Model
     ];
 
     protected $casts = [
-        'status'           => 'boolean',
-        'show_in_menu'     => 'boolean',
+        'status' => 'boolean',
+        'show_in_menu' => 'boolean',
         'show_on_homepage' => 'boolean',
-        'sort_order'       => 'integer',
+        'sort_order' => 'integer',
     ];
 
     // ─── Relationships ────────────────────────────────────
@@ -79,7 +80,7 @@ class Category extends Model
     {
         $base = Str::slug($name);
         $slug = $base;
-        $i    = 1;
+        $i = 1;
 
         $query = static::where('slug', $slug);
         if ($ignoreId) {
@@ -87,7 +88,7 @@ class Category extends Model
         }
 
         while ($query->exists()) {
-            $slug  = "{$base}-{$i}";
+            $slug = "{$base}-{$i}";
             $query = static::where('slug', $slug);
             if ($ignoreId) {
                 $query->where('id', '!=', $ignoreId);
@@ -97,4 +98,89 @@ class Category extends Model
 
         return $slug;
     }
+
+    /**
+     * Fetch top 5 parent categories and up to 8 subcategories for each category.
+     * Returns a 2-dimensional associative array containing 'name', 'slug', and 'subcategories'.
+     *
+     * @param int $limitCategories Default 5
+     * @param int $limitSubcategories Default 8
+     * @return array
+     */
+    public static function getNavbarCategories(int $limitCategories = 5, int $limitSubcategories = 8): array
+    {
+        $parentCategories = static::query()
+            ->where(function ($q) {
+                $q->whereNull('parent_id')->orWhere('parent_id', 0);
+            })
+            ->where('status', true)
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('name', 'asc')
+            ->take($limitCategories)
+            ->get(['id', 'name', 'slug']);
+
+        return $parentCategories->map(function ($cat) use ($limitSubcategories) {
+            $subcategories = static::query()
+                ->where('parent_id', $cat->id)
+                ->where('status', true)
+                ->orderBy('sort_order', 'asc')
+                ->orderBy('name', 'asc')
+                ->take($limitSubcategories)
+                ->get(['name', 'slug'])
+                ->toArray();
+
+            return [
+                'name' => $cat->name,
+                'slug' => $cat->slug,
+                'subcategories' => $subcategories,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get the top-level categories (max 4, ordered by sort_order) along with
+     * their subcategories, grouped by parent category id.
+     *
+     * @return array{categories: \Illuminate\Support\Collection, subcategories: array}
+     */
+    public static function getTopCategoriesWithSubcategories(): array
+    {
+        $categories = DB::table('categories')
+            ->select('id', 'name', 'slug')
+            ->whereNull('parent_id')
+            ->orderBy('sort_order')
+            ->limit(4)
+            ->get();
+
+        $subcategoryRows = DB::table('categories')
+            ->select('parent_id', 'name', 'slug')
+            ->whereNotNull('parent_id')
+            ->get();
+
+        $subcategories = [];
+        foreach ($subcategoryRows as $subcat) {
+            $subcategories[$subcat->parent_id][] = [
+                'name' => $subcat->name,
+                'slug' => $subcat->slug,
+            ];
+        }
+
+        return [
+            'categories' => $categories,
+            'subcategories' => $subcategories,
+        ];
+    }
+
+    public static function getCategoryId($slug)
+    {
+        $cat_id = DB::table('categories')->where('slug', $slug)->first()->id;
+        return $cat_id;
+    }
+    public static function getSubCategoryId($category, $slug)
+    {
+        //->where('parent_id', $category)
+        $cat_id = DB::table('categories')->where('slug', $slug)->first()->id;
+        return $cat_id;
+    }
 }
+

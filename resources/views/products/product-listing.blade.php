@@ -69,7 +69,7 @@
                     <div class="position-relative">
                         <a href="{{ route('product-details', $product->metaurl) }}">
                             <img
-                                src="http://127.0.0.1:8011/images/products/{{ asset($product->imgurl) }}"
+                                src="{{ asset('images/products/' . $product->imgurl) }}"
                                 alt="{{ $product->name }}"
                                 class="card-img-top"
                                 width="300"
@@ -82,14 +82,14 @@
                             >
                         </a>
 
-                        {{-- Top-right badge: New / Sale / Bestseller --}}
+                        {{-- Top-right badge: New / Sale / Bestseller 
                         @if ($product->is_on_sale)
                             <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sale</span>
                         @elseif ($product->is_bestseller)
                             <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Bestseller</span>
                         @elseif ($product->is_new)
                             <span class="badge bg-success position-absolute top-0 end-0 m-2">New</span>
-                        @endif
+                        @endif --}}
                     </div>
 
                     <div class="card-body d-flex flex-column">

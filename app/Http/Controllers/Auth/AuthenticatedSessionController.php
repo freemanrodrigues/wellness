@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use App\Models\Category;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+
 
 class AuthenticatedSessionController extends Controller
 {
@@ -16,11 +17,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
+
+        $nav = Category::getTopCategoriesWithSubcategories();
+
         $meta = [
             'title' => 'About Us',
             'description' => 'Learn more about ' . config('app.name') . ' and what we do.',
         ];
-        return view('auth.login', ['meta' => $meta]);
+        return view('auth.login', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
     }
 
     /**
@@ -28,7 +32,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        //     dd("Try ot Login");
+
         $request->authenticate();
 
         $request->session()->regenerate();

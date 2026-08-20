@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class MainController extends Controller
@@ -59,8 +60,9 @@ class MainController extends Controller
                 ],
             ],
         ];
-
-        return view('home', ['meta' => $meta, 'productRows' => $productRows]);
+        $nav = Category::getTopCategoriesWithSubcategories();
+        //  dd($nav);
+        return view('home', ['meta' => $meta, 'productRows' => $productRows, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
     }
 
     /**
@@ -72,8 +74,8 @@ class MainController extends Controller
             'title' => 'About Us',
             'description' => 'Learn more about ' . config('app.name') . ' and what we do.',
         ];
-
-        return view('about', ['meta' => $meta]);
+        $nav = Category::getTopCategoriesWithSubcategories();
+        return view('about', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
     }
 
     /**
@@ -85,8 +87,8 @@ class MainController extends Controller
             'title' => 'Privacy Policy',
             'description' => 'Learn how ' . config('app.name') . ' collects, uses, and protects your personal information.',
         ];
-
-        return view('privacy', ['meta' => $meta]);
+        $nav = Category::getTopCategoriesWithSubcategories();
+        return view('privacy', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
     }
 
     /**
@@ -98,8 +100,8 @@ class MainController extends Controller
             'title' => 'Terms of Service',
             'description' => 'Read the Terms of Service governing your use of ' . config('app.name') . '.',
         ];
-
-        return view('terms', ['meta' => $meta]);
+        $nav = Category::getTopCategoriesWithSubcategories();
+        return view('terms', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
     }
 
     public function contact(): View
@@ -108,7 +110,19 @@ class MainController extends Controller
             'title' => 'Contact Us',
             'description' => 'Read the Terms of Service governing your use of ' . config('app.name') . '.',
         ];
+        $nav = Category::getTopCategoriesWithSubcategories();
+        return view('contact', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
+    }
 
-        return view('contact', ['meta' => $meta]);
+    public function test(): View
+    {
+
+
+        $meta = [
+            'title' => 'Contact Us',
+            'description' => 'Read the Terms of Service governing your use of ' . config('app.name') . '.',
+        ];
+
+        return view('test', ['meta' => $meta]);
     }
 }

@@ -11,11 +11,11 @@
             <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-decoration-none">Home</a></li>
             <li class="breadcrumb-item">
                 <a href="" class="text-decoration-none">
-                    {{ $product->category->name }}
+                    {{-- $product->category->name --}}
                 </a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
-                {{ $product->subcategory->name }}
+                {{-- $product->subcategory->name --}}
             </li>
         </ol>
     </nav>
@@ -25,21 +25,23 @@
         {{-- LEFT: Product images --}}
         <div class="col-lg-6">
             <div class="mb-3">
-                <img id="mainProductImage" src="{{ asset($product->main_image) }}" alt="{{ $product->name }}"
-                    class="img-fluid rounded border w-100" style="aspect-ratio: 1 / 1; object-fit: cover;" loading="eager"
-                    fetchpriority="high">
+                <img id="mainProductImage" src="{{ asset('images/products/' . $product->imgurl) }}"
+                    alt="{{ $product->name }}" class="img-fluid rounded border w-100"
+                    style="aspect-ratio: 1 / 1; object-fit: cover;" loading="eager" fetchpriority="high">
             </div>
 
             {{-- Thumbnail strip — hover shows an enlarged popup preview --}}
             <div class="d-flex gap-2 flex-wrap position-relative">
-                @foreach (array_merge([$product->main_image], $product->gallery) as $index => $thumb)
+                @foreach (array_merge([$product->imgurl], $product->gallery ?? []) as $index => $thumb)
                     <div class="thumb-wrapper position-relative">
-                        <img src="{{ asset($thumb) }}" alt="{{ $product->name }} thumbnail {{ $index + 1 }}"
-                            class="thumb-image border rounded" width="64" height="64" loading="lazy"
-                            style="object-fit: cover; cursor: pointer;" data-full="{{ asset($thumb) }}">
+                        <img src="{{ asset('images/products/' . $thumb) }}"
+                            alt="{{ $product->name }} thumbnail {{ $index + 1 }}" class="thumb-image border rounded" width="64"
+                            height="64" loading="lazy" style="object-fit: cover; cursor: pointer;"
+                            data-full="{{ asset('images/products/' . $thumb) }}">
 
                         <div class="thumb-popup shadow">
-                            <img src="{{ asset($thumb) }}" alt="{{ $product->name }} preview" loading="lazy">
+                            <img src="{{ asset('images/products/' . $thumb) }}" alt="{{ $product->name }} preview"
+                                loading="lazy">
                         </div>
                     </div>
                 @endforeach
@@ -71,60 +73,94 @@
                 </div>
             @endif
 
-            {{-- Price + discount --}}
-            <div class="mb-3" id="priceBlock">
-                <span class="h4 fw-bold text-danger" id="currentPrice">
-                    ${{ number_format($product->variants[0]['price'], 2) }}
-                </span>
-                <span class="text-muted text-decoration-line-through ms-2 d-none" id="originalPrice"></span>
-                <span class="badge bg-danger ms-2 d-none" id="discountBadge"></span>
-            </div>
-
-            {{-- Variant / size selector --}}
-            <div class="mb-4">
-                <label class="form-label fw-semibold">Select Size</label>
-                <div class="d-flex flex-wrap gap-2" id="variantSelector">
-                    @foreach ($product->variants as $index => $variant)
-                        <button type="button"
-                            class="btn btn-outline-secondary btn-sm variant-btn {{ $index === 0 ? 'active' : '' }}"
-                            data-price="{{ $variant['price'] }}" data-original-price="{{ $variant['original_price'] ?? '' }}"
-                            data-sku="{{ $variant['sku'] }}">
-                            {{ $variant['label'] }}
-                        </button>
-                    @endforeach
+            @if ($product->isactive != 1)
+                {{-- No purchasable options exist for this product --}}
+                <div class="alert alert-warning">
+                    This product is currently unavailable for purchase.
                 </div>
-            </div>
 
-            {{-- Quantity --}}
-            <div class="mb-4">
-                <label for="quantity" class="form-label fw-semibold">Quantity</label>
-                <div class="input-group" style="max-width: 140px;">
-                    <button type="button" class="btn btn-outline-secondary" id="qtyMinus">&minus;</button>
-                    <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="20">
-                    <button type="button" class="btn btn-outline-secondary" id="qtyPlus">&plus;</button>
+            @else
+
+                {{-- Price + discount --}}
+                <div class="mb-3" id="priceBlock">
+                    @if (!empty($product->variants))
+                        <span class="h4 fw-bold text-danger" id="currentPrice">
+                            ${{ number_format($product->variants[0]['price'], 2) }}
+                        </span>
+                        <span class="text-muted text-decoration-line-through ms-2 d-none" id="originalPrice"></span>
+                        <span class="badge bg-danger ms-2 d-none" id="discountBadge"></span>
+                    @else
+                        <span class="h4 fw-bold text-danger" id="currentPrice">
+                            ${{ number_format($product->price, 2) }}
+                        </span>
+                        @if (!empty($product->original_price) && $product->original_price > $product->price)
+                            @php
+                                $discountPct = round((($product->original_price - $product->price) / $product->original_price) * 100);
+                            @endphp
+                            <span class="text-muted text-decoration-line-through ms-2" id="originalPrice">
+                                ${{ number_format($product->original_price, 2) }}
+                            </span>
+                            <span class="badge bg-danger ms-2" id="discountBadge">-{{ $discountPct }}%</span>
+                        @else
+                            <span class="text-muted text-decoration-line-through ms-2 d-none" id="originalPrice"></span>
+                            <span class="badge bg-danger ms-2 d-none" id="discountBadge"></span>
+                        @endif
+                    @endif
                 </div>
-            </div>
 
-            {{-- Brand --}}
-            @if (!empty($product->brand))
-                <p class="text-muted mb-4">
-                    <span class="fw-semibold">Brand:</span> {{ $product->brand }}
+                {{-- Variant / size selector — only shown when the product actually has variants --}}
+                @if (!empty($product->variants))
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Select Size</label>
+                        <div class="d-flex flex-wrap gap-2" id="variantSelector">
+                            @foreach ($product->variants as $index => $variant)
+                                <button type="button"
+                                    class="btn btn-outline-secondary btn-sm variant-btn {{ $index === 0 ? 'active' : '' }}"
+                                    data-price="{{ $variant['price'] }}" data-original-price="{{ $variant['original_price'] ?? '' }}"
+                                    data-sku="{{ $variant['sku'] }}">
+                                    {{ $variant['label'] }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Quantity --}}
+                <div class="mb-4">
+                    <label for="quantity" class="form-label fw-semibold">Quantity</label>
+                    <div class="input-group" style="max-width: 140px;">
+                        <button type="button" class="btn btn-outline-secondary" id="qtyMinus">&minus;</button>
+                        <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="20">
+                        <button type="button" class="btn btn-outline-secondary" id="qtyPlus">&plus;</button>
+                    </div>
+                </div>
+
+                {{-- Brand --}}
+                @if (!empty($product->brand))
+                    <p class="text-muted mb-4">
+                        <span class="fw-semibold">Brand:</span> {{ $product->brand }}
+                    </p>
+                @endif
+
+                <div class="d-grid gap-2 d-sm-flex mb-4">
+                    <button type="button" class="btn btn-primary btn-lg flex-fill" id="addToCartBtn">
+                        <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-truck me-1"></i> Same-day delivery available.
+                    @if (!empty($product->variants))
+                        SKU: <span id="currentSku">{{ $product->variants[0]['sku'] }}</span>
+                    @elseif (!empty($product->sku))
+                        SKU: <span id="currentSku">{{ $product->sku }}</span>
+                    @endif
                 </p>
+
             @endif
-
-            <div class="d-grid gap-2 d-sm-flex mb-4">
-                <button type="button" class="btn btn-primary btn-lg flex-fill" id="addToCartBtn">
-                    <i class="bi bi-cart-plus me-1"></i> Add to Cart
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-lg">
-                    <i class="bi bi-heart"></i>
-                </button>
-            </div>
-
-            <p class="small text-muted mb-0">
-                <i class="bi bi-truck me-1"></i> Same-day delivery available. SKU: <span
-                    id="currentSku">{{ $product->variants[0]['sku'] }}</span>
-            </p>
 
         </div>
     </div>
@@ -175,22 +211,24 @@
             </div>
 
             <div class="tab-pane fade" id="reviews" role="tabpanel">
+                {{--
                 @forelse ($product->reviews as $review)
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="d-flex justify-content-between">
-                            <strong>{{ $review['author'] }}</strong>
-                            <span class="text-muted small">{{ \Carbon\Carbon::parse($review['date'])->format('M j, Y') }}</span>
-                        </div>
-                        <div class="text-warning small mb-1">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <i class="bi bi-star{{ $i <= $review['rating'] ? '-fill' : '' }}"></i>
-                            @endfor
-                        </div>
-                        <p class="mb-0 small">{{ $review['comment'] }}</p>
+                <div class="mb-3 pb-3 border-bottom">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ $review['author'] }}</strong>
+                        <span class="text-muted small">{{ \Carbon\Carbon::parse($review['date'])->format('M j, Y') }}</span>
                     </div>
+                    <div class="text-warning small mb-1">
+                        @for ($i = 1; $i <= 5; $i++) <i class="bi bi-star{{ $i <= $review['rating'] ? '-fill' : '' }}"></i>
+                            @endfor
+                    </div>
+                    <p class="mb-0 small">{{ $review['comment'] }}</p>
+                </div>
                 @empty
-                    <p class="text-muted mb-0">No reviews yet. Be the first to review this product.</p>
+                <p class="text-muted mb-0">No reviews yet. Be the first to review this product.</p>
                 @endforelse
+                --}}
+                <p class="text-muted mb-0">No reviews yet. Be the first to review this product.</p>
             </div>
 
         </div>
@@ -284,6 +322,56 @@
             $('#qtyMinus').on('click', function () {
                 const input = $('#quantity');
                 input.val(Math.max(1, parseInt(input.val()) - 1));
+            });
+
+            $('#addToCartBtn').on('click', function () {
+                const btn = $(this);
+                const hasVariants = $('.variant-btn').length > 0;
+
+                const activePrice = hasVariants
+                    ? parseFloat($('.variant-btn.active').data('price'))
+                    : {{ $product->price ?? 0 }};
+
+                const activeSku = hasVariants
+                    ? $('.variant-btn.active').data('sku')
+                    : @json($product->sku ?? '');
+
+                const activeLabel = hasVariants
+                    ? $('.variant-btn.active').text().trim()
+                    : '';
+
+                const qty = parseInt($('#quantity').val());
+
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Adding...');
+
+                $.ajax({
+                    url: '{{ route('cart.add') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        product_id: {{ $product->id ?? 'null' }},
+                        product_name: @json($product->name) + (activeLabel ? ' (' + activeLabel + ')' : ''),
+                        product_image: @json(asset('images/products/' . $product->imgurl)),
+                        sku: activeSku,
+                        price: activePrice,
+                        qty: qty
+                    },
+                    success: function (response) {
+                        btn.prop('disabled', false).html('<i class="bi bi-cart-plus me-1"></i> Add to Cart');
+
+                        // Update the cart icon count in the navbar, if you add a #cartCount badge there
+                        $('#cartCount').text(response.cart_count).removeClass('d-none');
+
+                        $('#addToCartMsg').remove();
+                        btn.after('<div class="text-success small mt-2" id="addToCartMsg">Added to your cart!</div>');
+                        setTimeout(() => $('#addToCartMsg').fadeOut(300, function () { $(this).remove(); }), 2000);
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false).html('<i class="bi bi-cart-plus me-1"></i> Add to Cart');
+                        const msg = xhr.responseJSON?.message || 'Something went wrong adding this item. Please try again.';
+                        alert(msg);
+                    }
+                });
             });
         });
     </script>
