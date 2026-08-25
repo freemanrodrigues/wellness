@@ -34,6 +34,10 @@
                    value="{{ old('vendor_product_name', $product->vendor_product_name ?? '') }}">
         </div>
         <div class="col-12">
+            <label class="dash-form-label" for="short_description">Short Description</label>
+            <textarea class="dash-form-textarea" name="short_description" id="short_description" rows="2">{{ old('short_description', $product->short_description ?? '') }}</textarea>
+        </div>
+        <div class="col-12">
             <label class="dash-form-label" for="description">Description</label>
             <textarea class="dash-form-textarea" name="description" id="description" rows="4">{{ old('description', $product->description ?? '') }}</textarea>
         </div>
@@ -41,19 +45,19 @@
             <label class="dash-form-label" for="info">Additional Info</label>
             <textarea class="dash-form-textarea" name="info" id="info" rows="3">{{ old('info', $product->info ?? '') }}</textarea>
         </div>
+        <div class="col-12">
+            <label class="dash-form-label" for="use_case">Use Case</label>
+            <textarea class="dash-form-textarea" name="use_case" id="use_case" rows="2">{{ old('use_case', $product->use_case ?? '') }}</textarea>
+        </div>
         <div class="col-md-3">
             <label class="dash-form-label" for="imgurl">Image URL</label>
             <input type="text" class="dash-form-input" name="imgurl" id="imgurl"
                    value="{{ old('imgurl', $product->imgurl ?? '') }}" placeholder="https://…">
         </div>
-        <div class="col-md-9">
+        <div class="col-md-6">
             <label class="dash-form-label" for="more_img">Additional Image URLs (comma-separated)</label>
             <input type="text" class="dash-form-input" name="more_img" id="more_img"
                    value="{{ old('more_img', $product->more_img ?? '') }}">
-        </div>
-        <div class="col-12">
-            <label class="dash-form-label" for="more_desc">Additional Description</label>
-            <textarea class="dash-form-textarea" name="more_desc" id="more_desc" rows="2">{{ old('more_desc', $product->more_desc ?? '') }}</textarea>
         </div>
         <div class="col-md-3">
             <label class="dash-form-label" for="isactive">Status</label>
@@ -61,11 +65,6 @@
                 <option value="1" {{ old('isactive', $product->isactive ?? 1) == 1 ? 'selected' : '' }}>Active</option>
                 <option value="0" {{ old('isactive', $product->isactive ?? 1) == 0 ? 'selected' : '' }}>Inactive</option>
             </select>
-        </div>
-        <div class="col-md-3">
-            <label class="dash-form-label" for="use_type">Use Type</label>
-            <input type="text" class="dash-form-input" name="use_type" id="use_type"
-                   value="{{ old('use_type', $product->use_type ?? '') }}">
         </div>
     </div>
 

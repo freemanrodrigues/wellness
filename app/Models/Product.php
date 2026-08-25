@@ -14,8 +14,10 @@ class Product extends Model
         'name',
         'short_name',
         'vendor_product_name',
+        'short_description',
         'description',
         'info',
+        'use_case',
         'price',
         'discount',
         'deliverycharge',
@@ -30,7 +32,6 @@ class Product extends Model
         'cat_id',
         'subcat_id',
         'brand_id',
-        'use_type',
         'vendor_code',
         'sku',
         'barcode',
@@ -40,7 +41,6 @@ class Product extends Model
         'vendordeliveryprice',
         'more_price',
         'more_img',
-        'more_desc',
         'ratingvalue',
         'reviewcount',
         'viewed',
@@ -65,5 +65,15 @@ class Product extends Model
     public function getSellingPriceAttribute(): float
     {
         return max(0, $this->price - $this->discount);
+    }
+
+    /**
+     * The health concerns associated with this product.
+     */
+    public function healthConcerns()
+    {
+        return $this->belongsToMany(HealthConcern::class, 'health_concern_products')
+                    ->withPivot('sort_order')
+                    ->withTimestamps();
     }
 }

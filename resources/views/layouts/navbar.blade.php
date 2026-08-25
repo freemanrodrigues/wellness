@@ -180,6 +180,42 @@ SITE HEADER WRAPPER (sticky, two rows)
                         </li>
                     @endforeach
                 @endif
+                @if(isset($healthConditions) && !empty($healthConditions))
+                    <li class="pf-cat-item dropdown">
+                        <a href="/health-conditions" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">Health Conditions</a>
+                        <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
+                            <a href="/health-conditions">
+                                <p class="pf-megamenu__heading">Health Conditions</p>
+                            </a>
+                            <ul class="list-unstyled">
+                                @foreach($healthConditions as $hc)
+                                    <li>
+                                        <a class="pf-megamenu__link" href="/health/{{ $hc->slug }}">{{ $hc->name }}</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </li>
+                @endif
+                @if(isset($brandList) && !empty($brandList))
+                    <li class="pf-cat-item dropdown">
+                        <a href="/health-conditions" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">Shop By Brand</a>
+                        <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
+                            <a href="/health-conditions">
+                                <p class="pf-megamenu__heading">Shop By Brand</p>
+                            </a>
+                            <ul class="list-unstyled">
+                                @foreach($brandList as $brand)
+                                    <li>
+                                        <a class="pf-megamenu__link" href="/brand/{{ $brand->slug }}">{{ $brand->name }}</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </li>
+                @endif
             </ul>
         </div>
     </div>{{-- /.pf-catbar --}}

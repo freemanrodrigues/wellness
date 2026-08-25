@@ -31,11 +31,14 @@
         <div class="dash-page-header">
             <h1 class="dash-page-title">Products</h1>
             <div class="d-flex gap-2">
-                <a href="{{ route('dashboard.products.import') }}" class="btn btn-outline-success btn-sm px-3 fw-bold d-inline-flex align-items-center" id="btnImportProductCsv">
+                <a href="{{ route('dashboard.products.import') }}"
+                    class="btn btn-outline-success btn-sm px-3 fw-bold d-inline-flex align-items-center"
+                    id="btnImportProductCsv">
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import CSV
                 </a>
                 <a href="{{ route('dashboard.products.create') }}" class="btn-dash-primary" id="btnAddProduct">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
+                        viewBox="0 0 16 16">
                         <path
                             d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2" />
                     </svg>
@@ -84,7 +87,7 @@
                             <td class="text-muted" style="font-size:.78rem;">{{ $product->id }}</td>
                             <td>
                                 @if ($product->imgurl)
-                                    <img src="{{ $product->imgurl }}" alt="{{ $product->name }}"
+                                    <img src="{{ asset('images/products/' . $product->imgurl) }}" alt="{{ $product->name }}"
                                         style="width:44px;height:44px;object-fit:cover;border-radius:.35rem;border:1px solid #e8eaf0;">
                                 @else
                                     <div

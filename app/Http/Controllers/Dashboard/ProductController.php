@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Brand;
-use App\Models\Product;
+use App\Models\{Brand, Category, HealthConcern, Product};
+
+
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -102,8 +102,10 @@ class ProductController extends Controller
             'name',
             'short_name',
             'vendor_product_name',
+            'short_description',
             'description',
             'info',
+            'use_case',
             'price',
             'discount',
             'deliverycharge',
@@ -113,7 +115,6 @@ class ProductController extends Controller
             'isactive',
             'imgurl',
             'more_img',
-            'more_desc',
             'metatitle',
             'metadesc',
             'metakeyword',
@@ -123,7 +124,6 @@ class ProductController extends Controller
             'cat_id',
             'subcat_id',
             'brand_id',
-            'use_type',
             'vendor_code',
             'sku',
             'barcode'
@@ -146,7 +146,7 @@ class ProductController extends Controller
         $handle = fopen($file->getRealPath(), 'r');
 
         if (!$handle) {
-
+            dd("148");
             return back()->with('error', 'Unable to open uploaded CSV file.');
         }
 
@@ -154,7 +154,7 @@ class ProductController extends Controller
         $rawHeader = fgetcsv($handle, 4096, ',');
         if (!$rawHeader) {
             fclose($handle);
-
+            dd("156");
             return back()->with('error', 'CSV file is empty or formatted incorrectly.');
         }
 
@@ -181,7 +181,7 @@ class ProductController extends Controller
         $missingColumns = array_diff($mandatoryColumns, $header);
         if (!empty($missingColumns)) {
             fclose($handle);
-
+            dd("184");
             return back()->with('error', 'CSV file is missing mandatory columns: ' . implode(', ', $missingColumns));
         }
 
@@ -195,13 +195,13 @@ class ProductController extends Controller
 
             // Skip completely empty lines
             if (array_filter($rowValues) === []) {
-                echo "RRRRRRRRRRRRRRRRRR XZXXZRRRR";
+                echo "<br> RRRRRRRRRRRRRRRRRR XZXXZRRRR";
                 continue;
             }
 
             if (count($header) !== count($rowValues)) {
                 $errors[] = "Row {$rowNum}: Column count does not match header.";
-                echo "QQQQQ1";
+                echo "<br>  QQQQQ1";
                 continue;
             }
 
@@ -217,7 +217,7 @@ class ProductController extends Controller
 
             if (!empty($rowMissing)) {
                 $errors[] = "Row {$rowNum}: Missing required values for (" . implode(', ', $rowMissing) . ").";
-                echo "RRRRRRRRRRRRRRRRRR RRRR";
+                echo "<br>  RRRRRRRRRRRRRRRRRR RRRR";
                 continue;
             }
 
@@ -229,8 +229,10 @@ class ProductController extends Controller
                 'name' => $row['name'],
                 'short_name' => $row['short_name'] ?? null,
                 'vendor_product_name' => $row['vendor_product_name'],
+                'short_description' => $row['short_description'] ?? null,
                 'description' => $row['description'],
                 'info' => $row['info'] ?? null,
+                'use_case' => $row['use_case'] ?? null,
                 'price' => is_numeric($row['price']) ? (float) $row['price'] : 0,
                 'discount' => isset($row['discount']) && is_numeric($row['discount']) ? (float) $row['discount'] : 0,
                 'deliverycharge' => is_numeric($row['deliverycharge']) ? (float) $row['deliverycharge'] : 0,
@@ -240,7 +242,6 @@ class ProductController extends Controller
                 'isactive' => $isactive,
                 'imgurl' => $row['imgurl'],
                 'more_img' => isset($row['more_img']) && in_array(strtolower($row['more_img']), ['1', 'true', 'yes'], true) ? 1 : 0,
-                'more_desc' => $row['more_desc'] ?? null,
                 'metatitle' => $row['metatitle'],
                 'metadesc' => $row['metadesc'],
                 'metakeyword' => $row['metakeyword'] ?? null,
@@ -250,7 +251,6 @@ class ProductController extends Controller
                 'cat_id' => (int) $row['cat_id'],
                 'subcat_id' => (int) $row['subcat_id'],
                 'brand_id' => isset($row['brand_id']) && is_numeric($row['brand_id']) ? (int) $row['brand_id'] : null,
-                'use_type' => $row['use_type'] ?? null,
                 'vendor_code' => $row['vendor_code'],
                 'sku' => !empty($row['sku']) ? $row['sku'] : null,
                 'barcode' => $row['barcode'] ?? null,
@@ -280,7 +280,8 @@ $updatedCount++;
         $msg = "Import finished! {$insertedCount} product(s) inserted, {$updatedCount} product(s) updated.";
         if (!empty($errors)) {
             $msg .= " " . count($errors) . " row error(s) occurred.";
-            //  dd("QQQQQ   $msg  ");
+            print_r($errors);
+            dd("QQQQQ   $msg  ");
             return redirect()->route('dashboard.products.import')
                 ->with('success', $msg)
                 ->with('import_errors', $errors);
@@ -304,8 +305,10 @@ $updatedCount++;
             'name',
             'short_name',
             'vendor_product_name',
+            'short_description',
             'description',
             'info',
+            'use_case',
             'price',
             'discount',
             'deliverycharge',
@@ -315,7 +318,6 @@ $updatedCount++;
             'isactive',
             'imgurl',
             'more_img',
-            'more_desc',
             'metatitle',
             'metadesc',
             'metakeyword',
@@ -325,7 +327,6 @@ $updatedCount++;
             'cat_id',
             'subcat_id',
             'brand_id',
-            'use_type',
             'vendor_code',
             'sku',
             'barcode'
@@ -337,8 +338,10 @@ $updatedCount++;
                 'Ashwagandha Organic Root Extract',
                 'Ashwagandha Extract',
                 'Vendor Ashwagandha 500mg',
+                'Organic root extract for stress relief.',
                 'Premium organic ashwagandha root extract capsules for stress relief.',
                 'Take 2 capsules daily with meals.',
+                'Daily wellness and stress management.',
                 '29.99',
                 '5.00',
                 '4.99',
@@ -348,7 +351,6 @@ $updatedCount++;
                 '1',
                 'https://example.com/images/ashwagandha.jpg',
                 '0',
-                'Supports restful sleep and cognitive health.',
                 'Buy Organic Ashwagandha Extract 500mg',
                 'Best Ashwagandha capsules for stress and anxiety.',
                 'ashwagandha, stress relief, supplement',
@@ -358,7 +360,6 @@ $updatedCount++;
                 '1',
                 '5',
                 '2',
-                'Oral',
                 'VEND-ASH-01',
                 'SKU-ASH-500',
                 '8901234567890'
@@ -457,8 +458,10 @@ $updatedCount++;
             'name' => 'required|string|max:255',
             'short_name' => 'nullable|string|max:255',
             'vendor_product_name' => 'nullable|string|max:255',
+            'short_description' => 'nullable|string',
             'description' => 'nullable|string',
             'info' => 'nullable|string',
+            'use_case' => 'nullable|string',
 
             // Pricing
             'price' => 'required|numeric|min:0',
@@ -472,7 +475,6 @@ $updatedCount++;
             'isactive' => 'nullable|boolean',
             'imgurl' => 'nullable|string|max:500',
             'more_img' => 'nullable|string',
-            'more_desc' => 'nullable|string',
 
             // SEO
             'metatitle' => 'nullable|string|max:255',
@@ -488,7 +490,6 @@ $updatedCount++;
             'brand_id' => 'nullable|integer',
 
             // Identifiers
-            'use_type' => 'nullable|string|max:100',
             'vendor_code' => 'nullable|string|max:100',
             'sku' => $skuUnique,
             'barcode' => 'nullable|string|max:100',
@@ -526,9 +527,12 @@ $updatedCount++;
 
 
         $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+
         $category = $nav['categories'];
         $subcategory = $nav['subcategories'];
-        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory'));
+        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory', 'healthConditions', 'brandList'));
     }
 
     public function productSubListing(Request $request, $category, $subcategory): View
@@ -556,9 +560,11 @@ $updatedCount++;
 
 
         $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
         $category = $nav['categories'];
         $subcategory = $nav['subcategories'];
-        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory'));
+        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory', 'healthConditions', 'brandList'));
     }
     public function productDetails(string $slug): View
     {
@@ -603,8 +609,95 @@ $updatedCount++;
             'description' => \Illuminate\Support\Str::limit($product->description, 155),
         ];
         $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
         $category = $nav['categories'];
         $subcategory = $nav['subcategories'];
-        return view('products.product-details', compact('product', 'meta', 'category', 'subcategory'));
+        return view('products.product-details', compact('product', 'meta', 'category', 'subcategory', 'healthConditions', 'brandList'));
+    }
+
+
+    public function productListingByHealthConcern(Request $request, string $slug): View
+    {
+        $healthConcern = HealthConcern::where('slug', $slug)
+            ->where('status', 1)
+            ->firstOrFail();
+
+        $sort = $request->get('sort', 'newest');
+
+        $query = $healthConcern->products()
+            ->where('isactive', 1); // confirm this is the correct column name on `products`
+
+        match ($sort) {
+            'price_low' => $query->orderBy('price', 'asc'),
+            'price_high' => $query->orderBy('price', 'desc'),
+            'reviews' => $query->orderByDesc('reviews_count'),
+            default => $query->orderByDesc('created_at'), // 'newest'
+        };
+
+        $products = $query->paginate(24)->withQueryString();
+        //dd($products);
+        $meta = [
+            'title' => $healthConcern->name . ' Products',
+            'description' => $healthConcern->description
+                ?? "Browse our range of flowers, cakes, and gifts for {$healthConcern->name}.",
+        ];
+
+        $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+        return view('products.product-listing', [
+            'products' => $products,
+            'meta' => $meta,
+            'sort' => $sort,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
+            'healthConcern' => $healthConcern,
+            'healthConditions' => $healthConditions,
+            'brandList' => $brandList,
+        ]);
+    }
+
+
+    public function productListingByBrand(Request $request, string $slug): View
+    {
+        $brand = Brand::where('slug', $slug)
+            ->where('status', 1)
+            ->firstOrFail();
+        // dd($brand->id);
+        $brandId = $brand->id;
+        $sort = $request->get('sort', 'newest');
+
+        $query = Product::where('brand_id', $brandId)
+            ->where('isactive', 1); // confirm this is the correct column name on `products`
+
+        match ($sort) {
+            'price_low' => $query->orderBy('price', 'asc'),
+            'price_high' => $query->orderBy('price', 'desc'),
+            'reviews' => $query->orderByDesc('reviews_count'),
+            default => $query->orderByDesc('created_at'), // 'newest'
+        };
+
+        $products = $query->paginate(24)->withQueryString();
+        //dd($products);
+        $meta = [
+            'title' => $brand->name . ' Products',
+            'description' => $brand->description
+                ?? "Browse our range of flowers, cakes, and gifts for {$brand->name}.",
+        ];
+
+        $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+        return view('products.product-listing', [
+            'products' => $products,
+            'meta' => $meta,
+            'sort' => $sort,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
+            //    'healthConcern' => $healthConcern,
+            'healthConditions' => $healthConditions,
+            'brandList' => $brandList,
+        ]);
     }
 }

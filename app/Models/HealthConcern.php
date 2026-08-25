@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
-class Brand extends Model
+class HealthConcern extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'brands';
+    protected $table = 'health_concerns';
 
     protected $fillable = [
         'name',
@@ -78,10 +78,27 @@ class Brand extends Model
 
         return $slug;
     }
-    public static function getAllActiveBrands()
-    {
 
-        //  SELECT * FROM `brands` WHERE `status` = 1 AND `show_in_menu` = 1 ORDER BY name
+    // ─── Relationships ────────────────────────────────────
+
+    /**
+     * The products associated with this health concern.
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'health_concern_products')
+            ->withPivot('sort_order')
+            ->withTimestamps();
+    }
+
+    public static function getHealthConcernId($slug)
+    {
+        $data = HealthConcern::where('slug', $slug)->first();
+        return $data->id ?? 0;
+    }
+
+    public static function getAllActiveHealthConcerns()
+    {
         return self::where('status', 1)->where('show_in_menu', 1)
             ->orderBy('sort_order')
             ->orderBy('name')
@@ -89,3 +106,4 @@ class Brand extends Model
     }
 
 }
+

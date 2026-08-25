@@ -17,8 +17,10 @@ return new class extends Migration {
             $table->string('name');
             $table->string('short_name')->nullable();
             $table->string('vendor_product_name')->nullable();
+            $table->text('short_description')->nullable();
             $table->text('description')->nullable();
             $table->text('info')->nullable();
+            $table->text('use_case')->nullable();
 
             // Pricing
             $table->decimal('price', 10, 2)->default(0.00);
@@ -32,7 +34,6 @@ return new class extends Migration {
             $table->boolean('isactive')->default(true);
             $table->string('imgurl')->nullable();
             $table->boolean('more_img')->nullable();
-            $table->text('more_desc')->nullable();
 
             // SEO
             $table->string('metatitle')->nullable();
@@ -48,7 +49,6 @@ return new class extends Migration {
             $table->unsignedBigInteger('brand_id')->nullable()->comment('Brand ID');
 
             // Product identifiers
-            $table->string('use_type')->nullable();
             $table->string('vendor_code')->nullable();
             $table->string('sku')->nullable()->unique();
             $table->string('barcode')->nullable();

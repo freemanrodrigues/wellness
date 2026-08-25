@@ -79,8 +79,10 @@
                         <div class="col-md-6"><span style="color:#9ca3af;">Name</span><br><strong>{{ $product->name }}</strong></div>
                         <div class="col-md-3"><span style="color:#9ca3af;">Short Name</span><br>{{ $product->short_name ?? '—' }}</div>
                         <div class="col-md-3"><span style="color:#9ca3af;">Vendor Name</span><br>{{ $product->vendor_product_name ?? '—' }}</div>
+                        <div class="col-12 mt-2"><span style="color:#9ca3af;">Short Description</span><br>{{ $product->short_description ?? '—' }}</div>
                         <div class="col-12 mt-2"><span style="color:#9ca3af;">Description</span><br>{{ $product->description ?? '—' }}</div>
                         <div class="col-12 mt-2"><span style="color:#9ca3af;">Info</span><br>{{ $product->info ?? '—' }}</div>
+                        <div class="col-12 mt-2"><span style="color:#9ca3af;">Use Case</span><br>{{ $product->use_case ?? '—' }}</div>
                     </div>
                 </div>
 
@@ -108,7 +110,6 @@
                         <div class="col-md-2"><span style="color:#9ca3af;">Category</span><br>{{ $product->cat_id ?? '—' }}</div>
                         <div class="col-md-2"><span style="color:#9ca3af;">Sub-cat</span><br>{{ $product->subcat_id ?? '—' }}</div>
                         <div class="col-md-2"><span style="color:#9ca3af;">Brand</span><br>{{ $product->brand_id ?? '—' }}</div>
-                        <div class="col-md-2"><span style="color:#9ca3af;">Use Type</span><br>{{ $product->use_type ?? '—' }}</div>
                     </div>
                 </div>
 

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Category;
+use App\Models\{Brand, Category, HealthConcern, Product};
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -16,53 +16,110 @@ class MainController extends Controller
             'description' => 'Order fresh flowers, cakes, and gifts online with same-day delivery.',
         ];
 
-        // Replace with real queries once your Product model/relationships are ready, e.g.:
-        // 'products' => Product::where('category', 'best-sellers')->take(4)->get()
-        $productRows = [
-            [
-                'title' => 'Nutrition & Diet',
-                'view_all' => '#',
-                'products' => [
-                    ['name' => 'Whey Protein Isolate - Vanilla', 'price' => 54.99, 'image' => '/images/products/whey-protein-vanilla.jpg'],
-                    ['name' => 'Omega-3 Fish Oil Capsules', 'price' => 28.50, 'image' => '/images/products/omega-3-capsules.jpg'],
-                    ['name' => 'Organic Matcha Green Tea Powder', 'price' => 24.99, 'image' => '/images/products/organic-matcha.jpg'],
-                    ['name' => 'Plant-Based Meal Replacement Shake', 'price' => 39.99, 'image' => '/images/products/plant-meal-shake.webp'],
-                ],
-            ],
-            [
-                'title' => 'Fitness & Movement',
-                'view_all' => '#',
-                'products' => [
-                    ['name' => 'Non-Slip Eco Yoga Mat', 'price' => 35.00, 'image' => '/images/products/eco-yoga-mat.webp'],
-                    ['name' => 'Resistance Band Set (5 Levels)', 'price' => 19.99, 'image' => '/images/products/resistance-bands.jpg'],
-                    ['name' => 'Adjustable Dumbbells Set', 'price' => 110.50, 'image' => '/images/products/adjustable-dumbbells.webp'],
-                    ['name' => 'High-Density Deep Tissue Foam Roller', 'price' => 22.99, 'image' => '/images/products/foam-roller.webp'],
-                ],
-            ],
-            [
-                'title' => 'Mental Wellbeing',
-                'view_all' => '#',
-                'products' => [
-                    ['name' => 'Authentic Himalayan Salt Lamp', 'price' => 29.99, 'image' => '/images/products/himalayan-salt-lamp.jpg'],
-                    ['name' => 'Stress Relief Calming Herbal Tea', 'price' => 14.50, 'image' => '/images/products/calming-herbal-tea.jpg'],
-                    ['name' => 'Acupressure Mat and Pillow Set', 'price' => 38.00, 'image' => '/images/products/acupressure-mat.jpg'],
-                    ['name' => 'Natural Sleep Aid Gummies', 'price' => 18.99, 'image' => '/images/products/sleep-aid-gummies.jpg'],
-                ],
-            ],
-            [
-                'title' => 'Ayurveda',
-                'view_all' => '#',
-                'products' => [
-                    ['name' => 'Ashwagandha Root Extract', 'price' => 24.99, 'image' => '/images/products/ashwagandha-extract.webp'],
-                    ['name' => 'Triphala Digestive Churna', 'price' => 18.50, 'image' => '/images/products/triphala-churna.jpg'],
-                    ['name' => 'Brahmi Brain Wellness Drops', 'price' => 22.00, 'image' => '/images/products/brahmi-drops.jpg'],
-                    ['name' => 'Kumkumadi Face Glow Oil', 'price' => 45.99, 'image' => '/images/products/kumkumadi-oil.jpg'],
-                ],
-            ],
-        ];
+        $productRows = [];
+
+        // 1. Fetch categories set to show_on_homepage with active products
+        $categories = Category::where('show_on_homepage', 1)->orderBy('sort_order')->orderBy('name')->get();
+        foreach ($categories as $cat) {
+            $catProducts = Product::where('cat_id', $cat->id)
+                ->where('isactive', 1)
+                ->latest()
+                ->take(4)
+                ->get();
+
+            if ($catProducts->isNotEmpty()) {
+                $productRows[] = [
+                    'title' => $cat->name,
+                    'view_all' => route('product-listing.category', $cat->slug),
+                    'products' => $catProducts->map(function ($p) {
+                        $img = $p->imgurl;
+                        if ($img && !str_starts_with($img, 'http') && !str_starts_with($img, 'images/')) {
+                            $img = 'images/products/' . $img;
+                        }
+                        return [
+                            'id' => $p->id,
+                            'name' => $p->name,
+                            'price' => $p->price,
+                            'image' => $img ?: 'images/products/default.jpg',
+                            'metaurl' => $p->metaurl,
+                        ];
+                    })->toArray(),
+                ];
+            }
+        }
+
+        // 2. Fetch products by Health Concern ID = 6
+        $healthConcern = HealthConcern::find(6);
+        if ($healthConcern) {
+            $hcProducts = $healthConcern->products()
+                ->where('isactive', 1)
+                ->latest()
+                ->take(4)
+                ->get();
+
+            if ($hcProducts->isNotEmpty()) {
+                $productRows[] = [
+                    'title' => $healthConcern->name,
+                    'view_all' => route('health.products', $healthConcern->slug),
+                    'products' => $hcProducts->map(function ($p) {
+                        $img = $p->imgurl;
+                        if ($img && !str_starts_with($img, 'http') && !str_starts_with($img, 'images/')) {
+                            $img = 'images/products/' . $img;
+                        }
+                        return [
+                            'id' => $p->id,
+                            'name' => $p->name,
+                            'price' => $p->price,
+                            'image' => $img ?: 'images/products/default.jpg',
+                            'metaurl' => $p->metaurl,
+                        ];
+                    })->toArray(),
+                ];
+            }
+        }
+
+        // 3. Fetch products by Brand ID = 1
+        $brand = Brand::find(1);
+        if ($brand) {
+            $brandProducts = Product::where('brand_id', $brand->id)
+                ->where('isactive', 1)
+                ->latest()
+                ->take(4)
+                ->get();
+
+            if ($brandProducts->isNotEmpty()) {
+                $productRows[] = [
+                    'title' => $brand->name,
+                    'view_all' => route('brand.products', $brand->slug),
+                    'products' => $brandProducts->map(function ($p) {
+                        $img = $p->imgurl;
+                        if ($img && !str_starts_with($img, 'http') && !str_starts_with($img, 'images/')) {
+                            $img = 'images/products/' . $img;
+                        }
+                        return [
+                            'id' => $p->id,
+                            'name' => $p->name,
+                            'price' => $p->price,
+                            'image' => $img ?: 'images/products/default.jpg',
+                            'metaurl' => $p->metaurl,
+                        ];
+                    })->toArray(),
+                ];
+            }
+        }
+
         $nav = Category::getTopCategoriesWithSubcategories();
-        //  dd($nav);
-        return view('home', ['meta' => $meta, 'productRows' => $productRows, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+
+        return view('home', [
+            'meta' => $meta,
+            'productRows' => $productRows,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
+            'healthConditions' => $healthConditions,
+            'brandList' => $brandList
+        ]);
     }
 
     /**
@@ -75,7 +132,9 @@ class MainController extends Controller
             'description' => 'Learn more about ' . config('app.name') . ' and what we do.',
         ];
         $nav = Category::getTopCategoriesWithSubcategories();
-        return view('about', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+        return view('about', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
     }
 
     /**
@@ -88,7 +147,9 @@ class MainController extends Controller
             'description' => 'Learn how ' . config('app.name') . ' collects, uses, and protects your personal information.',
         ];
         $nav = Category::getTopCategoriesWithSubcategories();
-        return view('privacy', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+        return view('privacy', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
     }
 
     /**
@@ -101,7 +162,9 @@ class MainController extends Controller
             'description' => 'Read the Terms of Service governing your use of ' . config('app.name') . '.',
         ];
         $nav = Category::getTopCategoriesWithSubcategories();
-        return view('terms', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+        return view('terms', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
     }
 
     public function contact(): View
@@ -111,7 +174,9 @@ class MainController extends Controller
             'description' => 'Read the Terms of Service governing your use of ' . config('app.name') . '.',
         ];
         $nav = Category::getTopCategoriesWithSubcategories();
-        return view('contact', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories']]);
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+        return view('contact', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
     }
 
     public function test(): View

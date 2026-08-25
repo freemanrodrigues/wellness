@@ -109,16 +109,16 @@
                 @foreach($row['products'] as $productIndex => $product)
                     <div class="col-6 col-md-3">
                         <div class="card h-100 border-0 shadow-sm product-card">
-                            <a href="#" class="text-decoration-none">
+                            <a href="{{ !empty($product['metaurl']) ? route('product-details', $product['metaurl']) : '#' }}" class="text-decoration-none">
                                 <img src="{{ asset($product['image']) }}" alt="{{ $product['name'] }}" class="card-img-top"
                                     width="300" height="300" @if($rowIndex === 0 && $productIndex === 0) loading="eager"
                                     fetchpriority="high" @else loading="lazy" @endif>
                             </a>
                             <div class="card-body d-flex flex-column">
-                                <a href="#" class="text-decoration-none text-dark">
+                                <a href="{{ !empty($product['metaurl']) ? route('product-details', $product['metaurl']) : '#' }}" class="text-decoration-none text-dark">
                                     <h3 class="h6 card-title mb-1">{{ $product['name'] }}</h3>
                                 </a>
-                                <p class="card-text fw-bold mb-2">${{ number_format($product['price'], 2) }}</p>
+                                <p class="card-text fw-bold mb-2">₹{{ number_format($product['price'], 2) }}</p>
                                 <button type="button" class="btn btn-sm btn-outline-primary mt-auto">
                                     Add to Cart
                                 </button>
@@ -133,19 +133,28 @@
     <section class="border-top pt-4 mt-5 text-muted">
         <div class="row">
             <div class="col-lg-8">
-                <h2 class="h5">Fresh Flowers & Gifts, Delivered With Care</h2>
+                <h2 class="h5">Discover the Power of Himalayan Wellness</h2>
                 <p class="small">
-                    From same-day flower delivery to celebration cakes and curated gift baskets, we help you
-                    mark life's moments — big and small — with something thoughtful. Every bouquet is hand-arranged
-                    by trusted local florists and delivered fresh, so your gift arrives exactly the way you intended.
-                    Whether you're celebrating a birthday, sending a get-well wish, or planning ahead for an
-                    anniversary, our collection is designed to make sending flowers simple, reliable, and personal.
-                </p>
-                <p class="small mb-0">
-                    We proudly deliver across multiple countries with local florist partners on the ground,
-                    ensuring your gift is fresh, on time, and just as beautiful as pictured — no matter where
-                    your recipient lives.
-                </p>
+                    Welcome to a world of natural wellness inspired by the rich herbal traditions of Nepal and the
+                    Himalayas. We bring you carefully selected, authentic wellness products sourced from nature’s most
+                    treasured regions.
+                    <br><br>
+                    Explore the rare and fascinating Mad Honey, traditionally harvested from the Himalayan forests of Nepal.
+                    Discover the natural richness of Shilajit, valued for generations in traditional wellness practices, and
+                    experience the uniqueness of Cordyceps, also known as Yarsha Gumba, one of the Himalayas’ most prized
+                    natural treasures.
+                    <br><br>
+                    Explore the rare and fascinating Mad Honey, traditionally harvested from the Himalayan forests of Nepal.
+                    Discover the natural richness of Shilajit, valued for generations in traditional wellness practices, and
+                    experience the uniqueness of Cordyceps, also known as Yarsha Gumba, one of the Himalayas’ most prized
+                    natural treasures.
+                    <br><br>Our mission is to make authentic Himalayan herbs and wellness products accessible to people
+                    seeking a
+                    more natural approach to everyday wellbeing. Every product is selected with a focus on quality, purity,
+                    and
+                    authenticity.<br><br>
+
+                    Discover the wisdom of nature. Embrace the richness of the Himalayas. Begin your wellness journey today.
             </div>
         </div>
     </section>

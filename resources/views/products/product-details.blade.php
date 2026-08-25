@@ -72,7 +72,9 @@
                     </a>
                 </div>
             @endif
-
+            <div class="mb-4">
+                <p style="white-space: pre-line;">{{  $product->short_description }}</p>
+            </div>
             @if ($product->isactive != 1)
                 {{-- No purchasable options exist for this product --}}
                 <div class="alert alert-warning">
@@ -124,6 +126,7 @@
                         </div>
                     </div>
                 @endif
+
 
                 {{-- Quantity --}}
                 <div class="mb-4">
@@ -198,7 +201,7 @@
 
             <div class="tab-pane fade" id="productDetails" role="tabpanel">
                 <ul class="mb-0">
-                    @foreach (explode("\n", $product->details) as $line)
+                    @foreach (explode("\n", $product->info) as $line)
                         @if (trim($line) !== '')
                             <li>{{ trim($line) }}</li>
                         @endif
