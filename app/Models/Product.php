@@ -68,6 +68,30 @@ class Product extends Model
     }
 
     /**
+     * The brand associated with this product.
+     */
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    /**
+     * The main category associated with this product.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'cat_id');
+    }
+
+    /**
+     * The subcategory associated with this product.
+     */
+    public function subcategory()
+    {
+        return $this->belongsTo(Category::class, 'subcat_id');
+    }
+
+    /**
      * The health concerns associated with this product.
      */
     public function healthConcerns()

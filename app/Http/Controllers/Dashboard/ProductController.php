@@ -19,7 +19,7 @@ class ProductController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Product::query();
+        $query = Product::with(['brand', 'category', 'subcategory', 'healthConcerns']);
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -33,9 +33,64 @@ class ProductController extends Controller
             $query->where('isactive', $request->boolean('isactive'));
         }
 
+        if ($brandId = $request->input('brand_id')) {
+            $query->where('brand_id', $brandId);
+        }
+
+        if ($catId = $request->input('cat_id')) {
+            $query->where('cat_id', $catId);
+        }
+
+        if ($subcatId = $request->input('subcat_id')) {
+            $query->where('subcat_id', $subcatId);
+        }
+
+        if ($createdFrom = $request->input('created_from')) {
+            $query->whereDate('created_at', '>=', $createdFrom);
+        }
+
+        if ($createdTo = $request->input('created_to')) {
+            $query->whereDate('created_at', '<=', $createdTo);
+        }
+
+        if ($updatedFrom = $request->input('updated_from')) {
+            $query->whereDate('updated_at', '>=', $updatedFrom);
+        }
+
+        if ($updatedTo = $request->input('updated_to')) {
+            $query->whereDate('updated_at', '<=', $updatedTo);
+        }
+
         $products = $query->latest()->paginate(20)->withQueryString();
 
-        return view('dashboard.products.index', compact('products'));
+        $brands = Brand::orderBy('name')->get();
+        $categories = Category::whereNull('parent_id')
+            ->orWhere('parent_id', 0)
+            ->orderBy('name')
+            ->get();
+
+        $subcategories = collect();
+        if ($catId) {
+            $subcategories = Category::where('parent_id', $catId)->orderBy('name')->get();
+        }
+
+        $allSubcategories = Category::whereNotNull('parent_id')
+            ->where('parent_id', '!=', 0)
+            ->orderBy('name')
+            ->get();
+
+        $healthConcerns = HealthConcern::where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        return view('dashboard.products.index', compact(
+            'products',
+            'brands',
+            'categories',
+            'subcategories',
+            'allSubcategories',
+            'healthConcerns'
+        ));
     }
 
     /**
@@ -437,6 +492,22 @@ $updatedCount++;
 
         return redirect()->route('dashboard.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    /**
+     * Assign health concerns to a product.
+     */
+    public function assignHealthConcerns(Request $request, Product $product): RedirectResponse
+    {
+        $validated = $request->validate([
+            'health_concerns' => 'nullable|array',
+            'health_concerns.*' => 'exists:health_concerns,id',
+        ]);
+
+        $healthConcernIds = $validated['health_concerns'] ?? [];
+        $product->healthConcerns()->sync($healthConcernIds);
+
+        return redirect()->back()->with('success', 'Health concerns updated successfully for product "' . $product->name . '".');
     }
 
     // ──────────────────────────────────────────────────────────

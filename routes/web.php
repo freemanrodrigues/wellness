@@ -5,6 +5,8 @@ use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\CategoryController;
 use App\Http\Controllers\Dashboard\BrandController;
 use App\Http\Controllers\Dashboard\HealthConcernController;
+use App\Http\Controllers\Dashboard\BlogController as DashboardBlogController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Dashboard\{ScraperController, VendorProductManagementController};
 
 use Illuminate\Support\Facades\Route;
@@ -36,6 +38,9 @@ Route::get('/health/{slug}', [ProductController::class, 'productListingByHealthC
 
 Route::get('/brand/{slug}', [ProductController::class, 'productListingByBrand'])
     ->name('brand.products');
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{url}', [BlogController::class, 'show'])->name('blog.show');
 
 
 
@@ -80,6 +85,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::get('products/import', [ProductController::class, 'importForm'])->name('products.import');
         Route::post('products/import', [ProductController::class, 'importProcess'])->name('products.import.process');
         Route::get('products/sample-csv', [ProductController::class, 'downloadSampleCsv'])->name('products.sample-csv');
+        Route::post('products/{product}/assign-health-concerns', [ProductController::class, 'assignHealthConcerns'])->name('products.assign-health-concerns');
         Route::get('get-subcategories/{parentId}', [ProductController::class, 'getSubcategories'])->name('get-subcategories');
         Route::resource('products', ProductController::class);
         Route::resource('category', CategoryController::class);
@@ -93,6 +99,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::resource('vpm', VendorProductManagementController::class);
         Route::post('vpm/{id}/restore', [VendorProductManagementController::class, 'restore'])->name('vpm.restore');
         Route::any('vpm/updateprice', [ScraperController::class, 'updatePrice'])->name('vpm.updateprice');
+
+        Route::resource('blog', DashboardBlogController::class);
+        Route::post('blog/{id}/restore', [DashboardBlogController::class, 'restore'])->name('blog.restore');
 
     });
 

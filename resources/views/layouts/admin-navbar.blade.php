@@ -162,6 +162,29 @@ Mobile: Offcanvas Drawer with smooth accordions
             </div>
         </div>
 
+        {{-- Blog ↓ --}}
+        <div class="admin-mainnav__dropdown-wrap">
+            <button class="admin-mainnav__item {{ request()->routeIs('dashboard.blog.*') ? 'active' : '' }}"
+                type="button" aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-journal-text me-1"></i> Blog
+                <i class="bi bi-chevron-down admin-mainnav__caret"></i>
+            </button>
+            <div class="admin-mainnav__dropdown">
+                <a href="{{ route('dashboard.blog.index') }}" class="admin-mainnav__dd-item">
+                    <i class="bi bi-list-ul text-primary"></i>
+                    <div><span>All Blog Posts</span><small>Browse &amp; filter posts</small></div>
+                </a>
+                <a href="{{ route('dashboard.blog.create') }}" class="admin-mainnav__dd-item">
+                    <i class="bi bi-plus-circle text-success"></i>
+                    <div><span>Add Blog Post</span><small>Create a new article</small></div>
+                </a>
+                <a href="{{ route('blog.index') }}" target="_blank" class="admin-mainnav__dd-item">
+                    <i class="bi bi-box-arrow-up-right text-info"></i>
+                    <div><span>View Public Blog</span><small>Open public blog site</small></div>
+                </a>
+            </div>
+        </div>
+
 
         {{-- Vendors (no dropdown for now) --}}
         <a href="#" class="admin-mainnav__item">

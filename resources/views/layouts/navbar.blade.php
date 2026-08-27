@@ -216,6 +216,9 @@ SITE HEADER WRAPPER (sticky, two rows)
                         </div>
                     </li>
                 @endif
+                <li class="pf-cat-item">
+                    <a href="{{ route('blog.index') }}" class="pf-cat-link {{ request()->routeIs('blog.*') ? 'active' : '' }}">Blog</a>
+                </li>
             </ul>
         </div>
     </div>{{-- /.pf-catbar --}}
