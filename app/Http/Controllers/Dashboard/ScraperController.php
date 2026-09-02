@@ -9,9 +9,9 @@ use App\Models\VendorProductManagement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-
+use App\Services\ProductScraperService;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\Facades\Log;
 class ScraperController extends Controller
 {
     /**
@@ -50,8 +50,8 @@ class ScraperController extends Controller
      */
     public function getVendorPrice(Request $request)
     {
-        $url = "https://ayushmedi.com/collections/dabur";
-
+        $url = "https://ayushmedi.com/collections/sharmayu-pharma";
+        // die($url);
         try {
             $response = Http::withHeaders([
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -96,20 +96,146 @@ class ScraperController extends Controller
             $links = array_values(array_unique($links));
         }
 
+        $scraper = new ProductScraperService();
+        $scrapedData = [];
+
         foreach ($links as $k => $url) {
-            echo "<br>" . $url;
+            // if ($k > 1) {
+            //     continue;
+            // }
+            echo "<br>" . $k . '  ' . $url;
+            $data = $scraper->scrapeProductLdJson($url);
+
+            if ($data) {
+                echo "<pre>";
+                print_r($data);
+                echo "</pre>";
+                $scrapedData[] = $data;
+            } else {
+                // No Product JSON-LD found on the page, or fetch failed
+                Log::warning("No product data found for: {$url}");
+            }
         }
 
+        // Reusable insertion/update for vendor products (vid = 1) after the for loop
+        $vid = 1;
+        $result = $this->saveVendorProducts($scrapedData, $vid);
 
         if ($request->wantsJson()) {
             return response()->json([
                 'status' => 'success',
                 'count' => count($links),
+                'scraped' => count($scrapedData),
+                'inserted' => $result['inserted'],
+                'updated' => $result['updated'],
                 'links' => $links,
             ]);
         }
 
+        echo "<br>Processing completed! Inserted: {$result['inserted']}, Updated: {$result['updated']}";
+    }
 
+    /**
+     * Reusable function to insert or update product data in vendor_product_management table.
+     *
+     * @param array $products Array of scraped product arrays (or a single product array).
+     * @param int $vid Vendor ID (default: 1).
+     * @return array Summary with 'inserted' and 'updated' counts.
+     */
+    public function saveVendorProducts(array $products, int $vid = 1): array
+    {
+        if (empty($products)) {
+            return ['inserted' => 0, 'updated' => 0];
+        }
+
+        // If a single product array is passed, wrap it in a list
+        if (isset($products['name']) || isset($products['url']) || isset($products['sku'])) {
+            $products = [$products];
+        }
+
+        $insertedCount = 0;
+        $updatedCount = 0;
+
+        foreach ($products as $product) {
+            $name = $product['name'] ?? $product['offers']['name'] ?? null;
+            $description = $product['description'] ?? $product['offers']['description'] ?? null;
+            $info = $product['info'] ?? null;
+            $price = $product['offers']['price'] ?? $product['price'] ?? 0.00;
+            $vendorProdUrl = $product['url'] ?? $product['offers']['url'] ?? null;
+
+            $imgurl = $product['image'] ?? $product['offers']['image'] ?? null;
+            if (is_array($imgurl)) {
+                $imgurl = $imgurl[0] ?? null;
+            }
+
+            $catId = $product['cat_id'] ?? null;
+            $subcatId = $product['subcat_id'] ?? null;
+
+            // Brand lookup if brand name is provided
+            $brandId = $product['brand_id'] ?? null;
+            $brandName = $product['brand']['name'] ?? null;
+            if (!$brandId && !empty($brandName)) {
+                $brand = Brand::where('name', $brandName)->first();
+                if ($brand) {
+                    $brandId = $brand->id;
+                }
+            }
+
+            $vendorCode = $product['productID'] ?? $product['vendor_code'] ?? null;
+            $sku = $product['sku'] ?? $product['offers']['sku'] ?? null;
+            $status = $product['status'] ?? true;
+
+            if (empty($name)) {
+                continue;
+            }
+
+            // Check if vendor_code or sku for vendor (vid) already exists
+            $existing = null;
+            if (!empty($vendorCode) || !empty($sku)) {
+                $existing = VendorProductManagement::where('vid', $vid)
+                    ->where(function ($q) use ($vendorCode, $sku) {
+                        if (!empty($vendorCode) && !empty($sku)) {
+                            $q->where('vendor_code', $vendorCode)->orWhere('sku', $sku);
+                        } elseif (!empty($vendorCode)) {
+                            $q->where('vendor_code', $vendorCode);
+                        } elseif (!empty($sku)) {
+                            $q->where('sku', $sku);
+                        }
+                    })
+                    ->first();
+            }
+
+            if ($existing) {
+                // If vendor_code/sku for vendor exists, update price
+                $existing->update([
+                    'price' => $price,
+                ]);
+                $updatedCount++;
+            } else {
+                // Insert new vendor product
+                VendorProductManagement::create([
+                    'name' => $name,
+                    'description' => $description,
+                    'info' => $info,
+                    'price' => $price,
+                    'vendor_prod_url' => $vendorProdUrl,
+                    'imgurl' => $imgurl,
+                    'vid' => $vid,
+                    'cat_id' => $catId,
+                    'subcat_id' => $subcatId,
+                    'brand_id' => $brandId,
+                    'vendor_code' => $vendorCode,
+                    'sku' => $sku,
+                    'status' => $status,
+                ]);
+                $insertedCount++;
+            }
+        }
+
+        return [
+            'inserted' => $insertedCount,
+            'updated' => $updatedCount,
+        ];
     }
 
     /**

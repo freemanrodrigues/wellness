@@ -186,10 +186,20 @@ Mobile: Offcanvas Drawer with smooth accordions
         </div>
 
 
-        {{-- Vendors (no dropdown for now) --}}
-        <a href="#" class="admin-mainnav__item">
-            <i class="bi bi-truck me-1"></i> Vendors
-        </a>
+        {{-- Vendors ↓ --}}
+        <div class="admin-mainnav__dropdown-wrap">
+            <button class="admin-mainnav__item {{ request()->routeIs('dashboard.vpm.*') ? 'active' : '' }}"
+                type="button" aria-haspopup="true" aria-expanded="false">
+                <i class="bi bi-truck me-1"></i> Vendors
+                <i class="bi bi-chevron-down admin-mainnav__caret"></i>
+            </button>
+            <div class="admin-mainnav__dropdown">
+                <a href="{{ route('dashboard.vpm.index') }}" class="admin-mainnav__dd-item">
+                    <i class="bi bi-box-seam text-primary"></i>
+                    <div><span>Vendor Product Management</span><small>Manage &amp; view vendor products</small></div>
+                </a>
+            </div>
+        </div>
 
         {{-- Reports (no dropdown) --}}
         <a href="#" class="admin-mainnav__item">
@@ -352,9 +362,25 @@ Mobile: Offcanvas Drawer with smooth accordions
 
             {{-- Vendors --}}
             <div class="accordion-item">
-                <a href="#" class="accordion-button no-chevron py-3 px-3 fw-medium text-dark text-decoration-none">
-                    <i class="bi bi-truck me-2 text-secondary"></i> Vendors
-                </a>
+                <h2 class="accordion-header">
+                    <button
+                        class="accordion-button {{ request()->routeIs('dashboard.vpm.*') ? '' : 'collapsed' }} py-3 px-3 fw-medium"
+                        type="button" data-bs-toggle="collapse" data-bs-target="#mobileVendors">
+                        <i class="bi bi-truck me-2 text-secondary"></i> Vendors
+                    </button>
+                </h2>
+                <div id="mobileVendors"
+                    class="accordion-collapse collapse {{ request()->routeIs('dashboard.vpm.*') ? 'show' : '' }}"
+                    data-bs-parent="#adminMobileAccordion">
+                    <div class="accordion-body p-0 bg-light">
+                        <div class="list-group list-group-flush">
+                            <a href="{{ route('dashboard.vpm.index') }}"
+                                class="list-group-item list-group-item-action bg-transparent border-0 ps-4 py-2 {{ request()->routeIs('dashboard.vpm.*') ? 'fw-bold text-primary' : '' }}">
+                                <i class="bi bi-box-seam text-primary me-2"></i> Vendor Product Management
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {{-- Reports --}}

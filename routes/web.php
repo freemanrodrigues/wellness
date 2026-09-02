@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::resource('health-concern', HealthConcernController::class);
         Route::post('health-concern/{id}/restore', [HealthConcernController::class, 'restore'])->name('health-concern.restore');
         Route::get('vpm/getvendorprice', [ScraperController::class, 'getVendorPrice'])->name('vpm.getvendorprice');
+        Route::get('vpm/export', [VendorProductManagementController::class, 'exportCsv'])->name('vpm.export');
 
         Route::resource('vpm', VendorProductManagementController::class);
         Route::post('vpm/{id}/restore', [VendorProductManagementController::class, 'restore'])->name('vpm.restore');

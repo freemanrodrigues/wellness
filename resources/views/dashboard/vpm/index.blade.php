@@ -21,15 +21,68 @@
         <div class="dash-page-header">
             <h1 class="dash-page-title">Vendor Product Management</h1>
             <div class="d-flex gap-2">
+                <a href="{{ route('dashboard.vpm.export', request()->query()) }}" class="btn-dash-secondary" id="btnExportVpmCsv">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+                </a>
                 <a href="{{ route('dashboard.vpm.create') }}" class="btn-dash-primary" id="btnAddVpm">
                     <i class="bi bi-plus-lg me-1"></i> Add Vendor Product
                 </a>
             </div>
         </div>
 
+        {{-- Summary Cards --}}
+        @if(isset($summary))
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="dash-card py-3 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small">Total Products</div>
+                            <div class="fs-4 fw-bold text-dark">{{ number_format($summary['total']) }}</div>
+                        </div>
+                        <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-box-seam fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="dash-card py-3 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small">Active Products</div>
+                            <div class="fs-4 fw-bold text-success">{{ number_format($summary['active']) }}</div>
+                        </div>
+                        <div class="rounded-circle p-2 bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-check-circle fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="dash-card py-3 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small">Inactive Products</div>
+                            <div class="fs-4 fw-bold text-warning">{{ number_format($summary['inactive']) }}</div>
+                        </div>
+                        <div class="rounded-circle p-2 bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-pause-circle fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="dash-card py-3 px-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-muted small">Deleted Items</div>
+                            <div class="fs-4 fw-bold text-secondary">{{ number_format($summary['deleted']) }}</div>
+                        </div>
+                        <div class="rounded-circle p-2 bg-secondary bg-opacity-10 text-secondary">
+                            <i class="bi bi-trash fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Filter Bar --}}
         <form method="GET" action="{{ route('dashboard.vpm.index') }}" class="dash-filter-bar" id="vpmFilterForm">
-            <input type="text" name="search" class="dash-form-input" placeholder="Search name or vendor code…"
+            <input type="text" name="search" class="dash-form-input" placeholder="Search name, SKU or vendor code…"
                 value="{{ request('search') }}" id="vpmSearch">
             <select name="status" class="dash-form-select" style="max-width:160px;" id="vpmStatusFilter">
                 <option value="">All Status</option>
@@ -51,6 +104,7 @@
                         <th>Image</th>
                         <th>Name</th>
                         <th>Price</th>
+                        <th>SKU</th>
                         <th>Vendor Code</th>
                         <th>Vid</th>
                         <th>Category</th>
@@ -81,6 +135,7 @@
                                 @endif
                             </td>
                             <td class="fw-semibold">₹{{ number_format($item->price, 2) }}</td>
+                            <td style="font-family:monospace;font-size:.8rem;">{{ $item->sku ?? '—' }}</td>
                             <td style="font-family:monospace;font-size:.8rem;">{{ $item->vendor_code ?? '—' }}</td>
                             <td>{{ $item->vid ?? '—' }}</td>
                             <td>{{ $item->category->name ?? '—' }}</td>
@@ -124,7 +179,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center py-4 text-muted">No vendor products found.</td>
+                            <td colspan="11" class="text-center py-4 text-muted">No vendor products found.</td>
                         </tr>
                     @endforelse
                 </tbody>

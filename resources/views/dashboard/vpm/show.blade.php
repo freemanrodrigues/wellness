@@ -70,6 +70,15 @@
                         <div class="col-md-6"><span style="color:#9ca3af;">Name</span><br><strong>{{ $vpm->name }}</strong></div>
                         <div class="col-md-3"><span style="color:#9ca3af;">Price</span><br>₹{{ number_format($vpm->price, 2) }}</div>
                         <div class="col-md-3"><span style="color:#9ca3af;">Vendor Code</span><br>{{ $vpm->vendor_code ?? '—' }}</div>
+                        <div class="col-md-3 mt-2"><span style="color:#9ca3af;">SKU</span><br>{{ $vpm->sku ?? '—' }}</div>
+                        <div class="col-md-3 mt-2"><span style="color:#9ca3af;">Product ID</span><br>{{ $vpm->product_id ?? '—' }}</div>
+                        <div class="col-md-6 mt-2"><span style="color:#9ca3af;">Vendor Product URL</span><br>
+                            @if($vpm->vendor_prod_url)
+                                <a href="{{ $vpm->vendor_prod_url }}" target="_blank" class="text-primary text-break">{{ $vpm->vendor_prod_url }}</a>
+                            @else
+                                —
+                            @endif
+                        </div>
                         <div class="col-12 mt-2"><span style="color:#9ca3af;">Description</span><br>{{ $vpm->description ?? '—' }}</div>
                         <div class="col-12 mt-2"><span style="color:#9ca3af;">Additional Info</span><br>{{ $vpm->info ?? '—' }}</div>
                     </div>

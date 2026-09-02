@@ -14,16 +14,19 @@ class VendorProductManagement extends Model
     protected $table = 'vendor_product_management';
 
     protected $fillable = [
+        'product_id',
         'name',
         'description',
         'info',
         'price',
+        'vendor_prod_url',
         'imgurl',
         'vid',
         'cat_id',
         'subcat_id',
         'brand_id',
         'vendor_code',
+        'sku',
         'status',
     ];
 

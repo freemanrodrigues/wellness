@@ -17,12 +17,14 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->text('info')->nullable();
             $table->decimal('price', 10, 2)->default(0.00);
+            $table->string('vendor_prod_url')->nullable();
             $table->string('imgurl')->nullable();
             $table->unsignedBigInteger('vid')->nullable()->comment('Vendor ID');
             $table->unsignedBigInteger('cat_id')->nullable()->comment('Category ID');
             $table->unsignedBigInteger('subcat_id')->nullable()->comment('Subcategory ID');
             $table->unsignedBigInteger('brand_id')->nullable()->comment('Brand ID');
             $table->string('vendor_code')->nullable();
+            $table->string('sku')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
             $table->softDeletes();

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('parent_id')->nullable()->index()->comment('Self-referential parent');
             $table->string('name');
-            $table->string('slug')->unique();
+            $table->string('slug');
+            $table->unique(['parent_id', 'slug'], 'categories_slug_unique');
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->string('icon')->nullable();

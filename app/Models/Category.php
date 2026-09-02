@@ -75,24 +75,30 @@ class Category extends Model
 
     // ─── Helpers ─────────────────────────────────────────
 
-    /** Auto-generate slug from name if not set */
-    public static function generateSlug(string $name, ?int $ignoreId = null): string
+    /** Auto-generate slug from name if not set (scoped by parent_id) */
+    public static function generateSlug(string $name, ?int $ignoreId = null, mixed $parentId = null): string
     {
         $base = Str::slug($name);
         $slug = $base;
         $i = 1;
 
-        $query = static::where('slug', $slug);
-        if ($ignoreId) {
-            $query->where('id', '!=', $ignoreId);
-        }
+        $parentId = !empty($parentId) ? (int) $parentId : null;
 
-        while ($query->exists()) {
-            $slug = "{$base}-{$i}";
-            $query = static::where('slug', $slug);
+        $checkSlugExists = function ($slugToCheck) use ($parentId, $ignoreId) {
+            $query = static::where('slug', $slugToCheck);
+            if ($parentId !== null) {
+                $query->where('parent_id', $parentId);
+            } else {
+                $query->whereNull('parent_id');
+            }
             if ($ignoreId) {
                 $query->where('id', '!=', $ignoreId);
             }
+            return $query->exists();
+        };
+
+        while ($checkSlugExists($slug)) {
+            $slug = "{$base}-{$i}";
             $i++;
         }
 

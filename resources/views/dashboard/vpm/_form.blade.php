@@ -61,6 +61,11 @@
     <p class="dash-form-section mt-4">Vendor & Category Information</p>
     <div class="row g-3">
         <div class="col-md-3">
+            <label class="dash-form-label" for="product_id">Product ID</label>
+            <input type="number" class="dash-form-input" name="product_id" id="product_id"
+                   value="{{ old('product_id', $vpm->product_id ?? '') }}">
+        </div>
+        <div class="col-md-3">
             <label class="dash-form-label" for="vid">Vendor ID (vid)</label>
             <input type="number" class="dash-form-input" name="vid" id="vid"
                    value="{{ old('vid', $vpm->vid ?? '') }}">
@@ -69,6 +74,16 @@
             <label class="dash-form-label" for="vendor_code">Vendor Code</label>
             <input type="text" class="dash-form-input" name="vendor_code" id="vendor_code"
                    value="{{ old('vendor_code', $vpm->vendor_code ?? '') }}">
+        </div>
+        <div class="col-md-3">
+            <label class="dash-form-label" for="sku">SKU</label>
+            <input type="text" class="dash-form-input" name="sku" id="sku"
+                   value="{{ old('sku', $vpm->sku ?? '') }}">
+        </div>
+        <div class="col-md-6">
+            <label class="dash-form-label" for="vendor_prod_url">Vendor Product URL</label>
+            <input type="url" class="dash-form-input" name="vendor_prod_url" id="vendor_prod_url"
+                   value="{{ old('vendor_prod_url', $vpm->vendor_prod_url ?? '') }}" placeholder="https://…">
         </div>
         <div class="col-md-3">
             <label class="dash-form-label" for="cat_id">Category</label>

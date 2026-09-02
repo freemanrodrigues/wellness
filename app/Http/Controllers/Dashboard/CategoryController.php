@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
@@ -59,11 +60,13 @@ class CategoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate($this->rules());
+        $data = $request->validate($this->rules($request));
+
+        $parentId = !empty($data['parent_id']) ? (int) $data['parent_id'] : null;
 
         // Auto-generate slug if empty
         if (empty($data['slug'])) {
-            $data['slug'] = Category::generateSlug($data['name']);
+            $data['slug'] = Category::generateSlug($data['name'], null, $parentId);
         }
 
         // Cast checkboxes
@@ -106,10 +109,12 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category): RedirectResponse
     {
-        $data = $request->validate($this->rules($category->id));
+        $data = $request->validate($this->rules($request, $category->id));
+
+        $parentId = !empty($data['parent_id']) ? (int) $data['parent_id'] : null;
 
         if (empty($data['slug'])) {
-            $data['slug'] = Category::generateSlug($data['name'], $category->id);
+            $data['slug'] = Category::generateSlug($data['name'], $category->id, $parentId);
         }
 
         $data['status'] = $request->boolean('status');
@@ -149,17 +154,23 @@ class CategoryController extends Controller
     // Helpers
     // ──────────────────────────────────────────────────────
 
-    private function rules(?int $ignoreId = null): array
+    private function rules(Request $request, ?int $ignoreId = null): array
     {
-        $slugUnique = 'nullable|string|max:255|unique:categories,slug';
+        $parentId = $request->input('parent_id') ? (int) $request->input('parent_id') : null;
+
+        $slugRule = Rule::unique('categories', 'slug')
+            ->where(function ($query) use ($parentId) {
+                return $parentId ? $query->where('parent_id', $parentId) : $query->whereNull('parent_id');
+            });
+
         if ($ignoreId) {
-            $slugUnique .= ",{$ignoreId}";
+            $slugRule->ignore($ignoreId);
         }
 
         return [
             'parent_id' => 'nullable|integer|exists:categories,id',
             'name' => 'required|string|max:255',
-            'slug' => $slugUnique,
+            'slug' => ['nullable', 'string', 'max:255', $slugRule],
             'description' => 'nullable|string',
             'image' => 'nullable|string|max:500',
             'icon' => 'nullable|string|max:255',

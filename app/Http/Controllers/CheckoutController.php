@@ -177,13 +177,99 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Process payment submission and confirm order.
+     * Process payment submission and create order:
+     * 1. Calculate price totals and create Order Invoice record in `order_invoice`.
+     * 2. Copy cart items from `baskets` into `fin_basket` with assigned `order_id`.
+     * 3. Update `baskets` setting `basketflag = 'Y'`.
+     * 4. Forward order details to payment gateway / confirmation.
      */
     public function storePayment(Request $request): RedirectResponse
     {
+        $validated = $request->validate([
+            'payment_method' => 'nullable|string|max:50',
+        ]);
+
+        $paymentMethod = $validated['payment_method'] ?? 'paypal';
         $sessId = session()->getId();
 
-        // Convert active cart items to placed order (basketflag = 'Y')
+        // 1. Fetch active items from `baskets` table
+        $items = DB::table('baskets')
+            ->where('sess_id', $sessId)
+            ->where('basketflag', 'N')
+            ->get();
+
+        if ($items->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty or order has already been processed.');
+        }
+
+        // 2. Generate unique Order ID / Order Number
+        $orderId = 'ORD-' . date('Ymd') . '-' . rand(10000, 99999);
+
+        // 3. Price calculations
+        $subtotal = $items->sum(fn($item) => $item->prodprice * $item->qty);
+        $discount = (float) Session::get('promo_discount', 0);
+        $deliverycharge = (float) $items->sum('deliverycharge');
+        $totalamount = max(0, $subtotal - $discount + $deliverycharge);
+
+        // 4. Store Order Invoice details in `order_invoice` table
+        $invoiceId = DB::table('order_invoice')->insertGetId([
+            'user_id'              => Auth::id(),
+            'totalamount'          => $totalamount,
+            'orderdiscount'        => $subtotal,
+            'promo_discount'       => $discount,
+            'deliverycharge'       => $deliverycharge,
+            'gateway_id'           => $orderId,
+            'orderstatus'          => ($paymentMethod === 'paypal' ? 'Pending PayPal Payment' : 'Pending'),
+            'sess_id'              => $sessId,
+            'shopflag'             => 'Online',
+            'affiliate_id'         => null,
+            'affiliate_commission' => 0.00,
+            'error_code'           => null,
+            'error_message'        => null,
+            'cardname'             => $paymentMethod,
+            'cardnumber'           => null,
+            'created_at'           => now(),
+            'updated_at'           => now(),
+        ]);
+
+        // 5. Copy products from `baskets` table to `fin_basket` table
+        foreach ($items as $item) {
+            DB::table('fin_basket')->insert([
+                'order_id'              => $orderId,
+                'pid'                   => $item->pid,
+                'cid'                   => $item->cid ?? null,
+                'vid'                   => $item->vid ?? null,
+                'product_name'          => $item->product_name,
+                'qty'                   => $item->qty,
+                'product_price'         => $item->prodprice,
+                'vendor_price'          => $item->vendor_price ?? 0,
+                'pdiscount'             => $item->pdiscount ?? 0,
+                'deliverycharge'        => $item->deliverycharge ?? 0,
+                'vendor_deliverycharge' => $item->vendor_deliverycharge ?? 0,
+                'sess_id'               => $item->sess_id,
+                'user_email'            => $item->user_email,
+                'user_id'               => $item->user_id ?? Auth::id(),
+                'user_ip'               => $item->user_ip ?? $request->ip(),
+                's_firstname'           => $item->s_firstname,
+                's_lastname'            => $item->s_lastname,
+                's_address1'            => $item->s_address1,
+                's_address2'            => $item->s_address2,
+                's_landmark'            => $item->s_landmark,
+                's_city'                => $item->s_city,
+                's_state'               => $item->s_state,
+                's_pincode'             => $item->s_pincode,
+                's_country_id'          => $item->s_country_id,
+                's_email'               => $item->s_email,
+                's_phone'               => $item->s_phone,
+                'cardmessage'           => $item->cardmessage ?? null,
+                'deliverydate'          => $item->deliverydate ?? null,
+                'basketflag'            => 'Y',
+                'created_at'            => now(),
+                'updated_at'            => now(),
+            ]);
+        }
+
+        // 6. Update `baskets` table: set `basketflag = 'Y'`
         DB::table('baskets')
             ->where('sess_id', $sessId)
             ->where('basketflag', 'N')
@@ -192,6 +278,9 @@ class CheckoutController extends Controller
                 'updated_at' => now(),
             ]);
 
+        // 7. Save order IDs to session and clear promo discounts
+        Session::put('placed_order_id', $orderId);
+        Session::put('placed_invoice_id', $invoiceId);
         Session::forget(['promo_code', 'promo_discount']);
 
         return redirect()->route('checkout.confirm');
@@ -202,13 +291,28 @@ class CheckoutController extends Controller
      */
     public function confirm(): View
     {
-        $orderNumber = rand(100000, 999999);
+        $orderId = Session::get('placed_order_id');
+
+        $invoice = null;
+        $finItems = collect();
+
+        if ($orderId) {
+            $invoice = DB::table('order_invoice')->where('gateway_id', $orderId)->first();
+            $finItems = DB::table('fin_basket')->where('order_id', $orderId)->get();
+        } else {
+            // Fallback for logged-in user if session refreshed
+            $invoice = DB::table('order_invoice')->where('user_id', Auth::id())->latest('id')->first();
+            if ($invoice) {
+                $orderId = $invoice->gateway_id;
+                $finItems = DB::table('fin_basket')->where('order_id', $orderId)->get();
+            }
+        }
 
         $meta = [
-            'title' => 'Order Confirmed',
+            'title' => 'Order Confirmed - ' . ($orderId ?? 'Wellness'),
             'description' => 'Thank you for your order.',
         ];
 
-        return view('cart.confirm', compact('orderNumber', 'meta'));
+        return view('cart.confirm', compact('orderId', 'invoice', 'finItems', 'meta'));
     }
 }
