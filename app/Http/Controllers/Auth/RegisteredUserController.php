@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\BasketController;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -18,8 +19,17 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        if (!session()->has('url.intended')) {
+            $prevUrl = url()->previous();
+            if ($prevUrl && $prevUrl !== $request->url()) {
+                $path = parse_url($prevUrl, PHP_URL_PATH);
+                if ($path !== '/login' && $path !== '/register') {
+                    session()->put('url.intended', $prevUrl);
+                }
+            }
+        }
         $countries = \Illuminate\Support\Facades\DB::table('countries')
             ->where('active', 1)
             ->orderBy('countryname')
@@ -60,6 +70,8 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $oldSessId = session()->getId();
+
         $request->validate([
             'firstname' => ['required', 'string', 'max:100'],
             'lastname' => ['required', 'string', 'max:100'],
@@ -94,6 +106,13 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('home', absolute: false));
+        $request->session()->regenerate();
+
+        $newSessId = session()->getId();
+
+        // Merge guest basket items to newly registered user & new session ID
+        BasketController::mergeGuestBasket($oldSessId, $newSessId, $user);
+
+        return redirect()->intended(route('home', absolute: false));
     }
 }

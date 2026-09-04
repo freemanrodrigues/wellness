@@ -50,7 +50,7 @@ class ScraperController extends Controller
      */
     public function getVendorPrice(Request $request)
     {
-        $url = "https://ayushmedi.com/collections/sharmayu-pharma";
+        $url = "https://ayushmedi.com/collections/zandu-pharmaceutical-works-limited?filter.v.price.gte=&filter.v.price.lte=&sort_by=created-descending";
         // die($url);
         try {
             $response = Http::withHeaders([

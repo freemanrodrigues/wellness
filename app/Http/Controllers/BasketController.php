@@ -223,4 +223,81 @@ class BasketController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /**
+     * Merge guest basket items into user's authenticated basket upon login/registration.
+     */
+    public static function mergeGuestBasket(string $oldSessId, string $newSessId, $user): void
+    {
+        if (empty($oldSessId) || !$user) {
+            return;
+        }
+
+        // Fetch active guest basket items
+        $guestItems = DB::table('baskets')
+            ->where('sess_id', $oldSessId)
+            ->where('basketflag', 'N')
+            ->get();
+
+        if ($guestItems->isEmpty()) {
+            // Update any existing active items of this user to the new session ID
+            DB::table('baskets')
+                ->where('user_id', $user->id)
+                ->where('basketflag', 'N')
+                ->update([
+                    'sess_id'    => $newSessId,
+                    'updated_at' => now(),
+                ]);
+            return;
+        }
+
+        foreach ($guestItems as $item) {
+            // Check if this product already exists in new session or user's active cart
+            $existing = DB::table('baskets')
+                ->where('basketflag', 'N')
+                ->where(function ($query) use ($newSessId, $user) {
+                    $query->where('sess_id', $newSessId)
+                          ->orWhere('user_id', $user->id);
+                })
+                ->where('pid', $item->pid)
+                ->first();
+
+            if ($existing) {
+                // Merge quantity into existing record, update session ID and user info
+                DB::table('baskets')
+                    ->where('id', $existing->id)
+                    ->update([
+                        'sess_id'    => $newSessId,
+                        'user_id'    => $user->id,
+                        'user_email' => $user->email,
+                        'qty'        => $existing->qty + $item->qty,
+                        'updated_at' => now(),
+                    ]);
+
+                // Delete the duplicate guest item row if it's a different record
+                if ($existing->id !== $item->id) {
+                    DB::table('baskets')->where('id', $item->id)->delete();
+                }
+            } else {
+                // Update guest item to new session ID & user details
+                DB::table('baskets')
+                    ->where('id', $item->id)
+                    ->update([
+                        'sess_id'    => $newSessId,
+                        'user_id'    => $user->id,
+                        'user_email' => $user->email,
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
+
+        // Sync all active items of this user to the new session ID
+        DB::table('baskets')
+            ->where('user_id', $user->id)
+            ->where('basketflag', 'N')
+            ->update([
+                'sess_id'    => $newSessId,
+                'updated_at' => now(),
+            ]);
+    }
 }

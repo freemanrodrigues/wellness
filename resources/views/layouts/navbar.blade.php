@@ -64,7 +64,7 @@ SITE HEADER WRAPPER (sticky, two rows)
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item pf-user-menu__item" href="#" id="menuMyAccount">
+                                    <a class="dropdown-item pf-user-menu__item" href="{{ route('myaccount.home') }}" id="menuMyAccount">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
                                             class="me-2" viewBox="0 0 16 16">
                                             <path

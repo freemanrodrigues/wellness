@@ -78,9 +78,9 @@ class MainController extends Controller
             }
         }
 
-        // 3. Fetch products by Brand ID = 1
-        $brand = Brand::find(1);
-        if ($brand) {
+        // 3. Fetch products by Brands where show_on_homepage = 1
+        $brands = Brand::where('show_on_homepage', 1)->get();
+        foreach ($brands as $brand) {
             $brandProducts = Product::where('brand_id', $brand->id)
                 ->where('isactive', 1)
                 ->latest()

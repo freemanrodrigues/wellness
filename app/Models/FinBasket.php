@@ -57,4 +57,20 @@ class FinBasket extends Model
         'vendor_deliverycharge' => 'decimal:2',
         'deliverydate' => 'date',
     ];
+
+    /**
+     * Relationship: Product details
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'pid');
+    }
+
+    /**
+     * Relationship: Associated Order Invoice
+     */
+    public function invoice()
+    {
+        return $this->belongsTo(OrderInvoice::class, 'order_id', 'gateway_id');
+    }
 }

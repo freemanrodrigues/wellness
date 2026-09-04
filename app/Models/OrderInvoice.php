@@ -52,6 +52,6 @@ class OrderInvoice extends Model
      */
     public function items()
     {
-        return $this->hasMany(FinBasket::class, 'order_id');
+        return $this->hasMany(FinBasket::class, 'order_id', 'gateway_id');
     }
 }

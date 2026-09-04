@@ -59,15 +59,39 @@
 
                         <div class="accordion" id="paymentAccordion">
 
-                            {{-- Option 1: Credit / Debit Card --}}
+                            {{-- Option 1: PayPal --}}
+                            <div class="accordion-item border rounded mb-3 overflow-hidden border-primary border-2">
+                                <h3 class="accordion-header" id="headingPaypal">
+                                    <button class="accordion-button py-3 fw-semibold bg-primary-subtle text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePaypal" aria-expanded="true" aria-controls="collapsePaypal">
+                                        <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_paypal" value="paypal" checked>
+                                        <i class="bi bi-paypal me-2 text-primary fs-5"></i> PayPal
+                                        <span class="badge bg-primary ms-auto">Recommended</span>
+                                    </button>
+                                </h3>
+                                <div id="collapsePaypal" class="accordion-collapse collapse show" aria-labelledby="headingPaypal" data-bs-parent="#paymentAccordion">
+                                    <div class="accordion-body bg-light">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="flex-shrink-0">
+                                                <i class="bi bi-shield-check text-success fs-2"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-1 text-dark">Pay securely with PayPal</h6>
+                                                <p class="small text-muted mb-0">Upon clicking "Place Order", your order will be created and you will be directed to PayPal to complete your payment of <strong>${{ number_format($total, 2) }}</strong>.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Option 2: Credit / Debit Card --}}
                             <div class="accordion-item border rounded mb-3 overflow-hidden">
                                 <h3 class="accordion-header" id="headingCard">
-                                    <button class="accordion-button py-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCard" aria-expanded="true" aria-controls="collapseCard">
-                                        <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_card" value="card" checked>
+                                    <button class="accordion-button collapsed py-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCard" aria-expanded="false" aria-controls="collapseCard">
+                                        <input class="form-check-input me-2" type="radio" name="payment_method" id="pay_card" value="card">
                                         <i class="bi bi-credit-card me-2 text-primary"></i> Credit / Debit Card
                                     </button>
                                 </h3>
-                                <div id="collapseCard" class="accordion-collapse collapse show" aria-labelledby="headingCard" data-bs-parent="#paymentAccordion">
+                                <div id="collapseCard" class="accordion-collapse collapse" aria-labelledby="headingCard" data-bs-parent="#paymentAccordion">
                                     <div class="accordion-body bg-light">
                                         <div class="row g-3">
                                             <div class="col-12">

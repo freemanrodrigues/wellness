@@ -14,6 +14,8 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BasketController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\MyAccountController;
+use App\Http\Controllers\WishlistController;
 
 
 Route::get('/test', [MainController::class, 'test'])->name('test');
@@ -119,7 +121,24 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Wishlist Routes
+    Route::post('/wishlist/add', [WishlistController::class, 'store'])->name('wishlist.add');
+    Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 
+    // My Account Routes
+    Route::prefix('myaccount')->name('myaccount.')->group(function () {
+        Route::get('/', function () {
+            return redirect()->route('myaccount.home');
+        });
+        Route::get('/home', [MyAccountController::class, 'home'])->name('home');
+        Route::get('/profile', [MyAccountController::class, 'profile'])->name('profile');
+        Route::get('/orders', [MyAccountController::class, 'orders'])->name('orders');
+        Route::get('/coupons', [MyAccountController::class, 'coupons'])->name('coupons');
+        Route::get('/wishlist', [MyAccountController::class, 'wishlist'])->name('wishlist');
+        Route::get('/addresses', [MyAccountController::class, 'addresses'])->name('addresses');
+        Route::get('/preferences', [MyAccountController::class, 'preferences'])->name('preferences');
+        Route::get('/gift-cards', [MyAccountController::class, 'giftCards'])->name('gift-cards');
+    });
 });
 
 require __DIR__ . '/auth.php';

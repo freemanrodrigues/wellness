@@ -9,7 +9,7 @@
 
     @if ($items->isEmpty())
         <div class="alert alert-light border text-center py-5">
-            Your cart is empty. <a href="{{ route('product-listing') }}">Continue shopping</a>.
+            Your cart is empty. <a href="{{ route('home') }}">Continue shopping</a>.
         </div>
     @else
 
@@ -109,7 +109,8 @@
                             </button>
                         @endif
 
-                        <a href="{{ route('checkout.shipping') }}" class="btn btn-primary w-100 mt-3 py-2 fw-semibold" id="btnProceedCheckout">
+                        <a href="{{ route('checkout.shipping') }}" class="btn btn-primary w-100 mt-3 py-2 fw-semibold"
+                            id="btnProceedCheckout">
                             Proceed to Checkout <i class="bi bi-arrow-right ms-1"></i>
                         </a>
 

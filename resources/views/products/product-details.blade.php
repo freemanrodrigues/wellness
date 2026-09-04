@@ -5,6 +5,20 @@
 
 @section('content')
 
+    {{-- Session Flash Alerts --}}
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4 rounded-3 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {!! session('success') !!}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if (session('info'))
+        <div class="alert alert-info alert-dismissible fade show mb-4 rounded-3 shadow-sm" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i> {!! session('info') !!}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     {{-- Breadcrumb --}}
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0">
@@ -145,14 +159,30 @@
                     </p>
                 @endif
 
-                <div class="d-grid gap-2 d-sm-flex mb-4">
-                    <button type="button" class="btn btn-primary btn-lg flex-fill" id="addToCartBtn">
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap" id="cartActionGroup">
+                    <button type="button" class="btn btn-primary px-4 py-2" id="addToCartBtn" style="min-width: 160px;">
                         <i class="bi bi-cart-plus me-1"></i> Add to Cart
                     </button>
-                    <button type="button" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-heart"></i>
-                    </button>
+
+                    <a href="{{ route('cart.index') }}" class="btn btn-primary px-4 py-2 d-none" id="viewCartBtn" style="min-width: 140px;">
+                        <i class="bi bi-cart-check me-1"></i> View Cart
+                    </a>
+
+                    <a href="{{ route('home') }}" class="btn btn-outline-success px-4 py-2 d-none" id="shopMoreBtn" style="min-width: 140px;">
+                        <i class="bi bi-bag-plus me-1"></i> Shop More
+                    </a>
+
+                    <form method="POST" action="{{ route('wishlist.add') }}" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <button type="submit" class="btn btn-outline-danger px-3 py-2" id="likeWishlistBtn"
+                            title="{{ !empty($isWishlisted) ? 'In your wishlist' : 'Like & Save to wishlist' }}">
+                            <i class="bi {{ !empty($isWishlisted) ? 'bi-heart-fill text-danger' : 'bi-heart' }}"></i>
+                        </button>
+                    </form>
                 </div>
+
+                <div id="cartMessageContainer" class="mb-3"></div>
 
                 <p class="small text-muted mb-0">
                     <i class="bi bi-truck me-1"></i> Same-day delivery available.
@@ -360,14 +390,21 @@
                         qty: qty
                     },
                     success: function (response) {
-                        btn.prop('disabled', false).html('<i class="bi bi-cart-plus me-1"></i> Add to Cart');
-
-                        // Update the cart icon count in the navbar, if you add a #cartCount badge there
+                        // Update cart count badge in header/navbar
                         $('#cartCount').text(response.cart_count).removeClass('d-none');
 
-                        $('#addToCartMsg').remove();
-                        btn.after('<div class="text-success small mt-2" id="addToCartMsg">Added to your cart!</div>');
-                        setTimeout(() => $('#addToCartMsg').fadeOut(300, function () { $(this).remove(); }), 2000);
+                        // Display success message
+                        $('#cartMessageContainer').html(
+                            '<div class="alert alert-success alert-dismissible fade show rounded-3 p-2 px-3 small shadow-sm mb-0 d-flex align-items-center justify-content-between" role="alert">' +
+                            '<span><i class="bi bi-check-circle-fill me-2"></i> Product added to basket successfully!</span>' +
+                            '<button type="button" class="btn-close ms-2" data-bs-dismiss="alert" style="font-size:0.7rem;"></button>' +
+                            '</div>'
+                        );
+
+                        // Hide Add to Cart button and Show View Cart & Shop More buttons
+                        btn.addClass('d-none');
+                        $('#viewCartBtn').removeClass('d-none');
+                        $('#shopMoreBtn').removeClass('d-none');
                     },
                     error: function (xhr) {
                         btn.prop('disabled', false).html('<i class="bi bi-cart-plus me-1"></i> Add to Cart');

@@ -684,7 +684,15 @@ $updatedCount++;
         $brandList = Brand::getAllActiveBrands();
         $category = $nav['categories'];
         $subcategory = $nav['subcategories'];
-        return view('products.product-details', compact('product', 'meta', 'category', 'subcategory', 'healthConditions', 'brandList'));
+
+        $isWishlisted = false;
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $isWishlisted = \App\Models\Wishlist::where('user_id', \Illuminate\Support\Facades\Auth::id())
+                ->where('product_id', $product->id)
+                ->exists();
+        }
+
+        return view('products.product-details', compact('product', 'meta', 'category', 'subcategory', 'healthConditions', 'brandList', 'isWishlisted'));
     }
 
 
