@@ -44,6 +44,9 @@ class Product extends Model
         'ratingvalue',
         'reviewcount',
         'viewed',
+        'for_whom',
+        'product_from',
+        'sort_order',
     ];
 
     protected $casts = [
@@ -57,6 +60,9 @@ class Product extends Model
         'isactive'            => 'boolean',
         'reviewcount'         => 'integer',
         'viewed'              => 'integer',
+        'for_whom'            => 'integer',
+        'product_from'        => 'integer',
+        'sort_order'          => 'integer',
     ];
 
     /**
@@ -73,6 +79,14 @@ class Product extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class, 'brand_id');
+    }
+
+    /**
+     * The product form associated with this product.
+     */
+    public function productForm()
+    {
+        return $this->belongsTo(ProductForm::class, 'product_from');
     }
 
     /**

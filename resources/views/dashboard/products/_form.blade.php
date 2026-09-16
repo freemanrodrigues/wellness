@@ -195,6 +195,49 @@
             </select>
             @error('brand_id') <div class="dash-form-error">{{ $message }}</div> @enderror
         </div>
+
+        <div class="col-md-3">
+            <label class="dash-form-label" for="for_whom">For Whom</label>
+            <select class="dash-form-select @error('for_whom') is-invalid @enderror" name="for_whom" id="for_whom">
+                <option value="">Select For Whom</option>
+                @php
+                    $forWhomOptions = isset($forWhomList) && !empty($forWhomList)
+                        ? $forWhomList
+                        : config('constants.for_whom', []);
+                @endphp
+                @foreach($forWhomOptions as $key => $label)
+                    <option value="{{ $key }}" {{ old('for_whom', $product->for_whom ?? '') == $key ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                @endforeach
+            </select>
+            @error('for_whom') <div class="dash-form-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="col-md-3">
+            <label class="dash-form-label" for="product_from">Product Form</label>
+            <select class="dash-form-select @error('product_from') is-invalid @enderror" name="product_from" id="product_from">
+                <option value="">Select Product Form</option>
+                @php
+                    $pFormList = isset($productForms) && (is_countable($productForms) ? count($productForms) > 0 : !empty($productForms))
+                        ? $productForms
+                        : \App\Models\ProductForm::where('isactive', true)->orderBy('product_form')->get();
+                @endphp
+                @foreach($pFormList as $pFormItem)
+                    <option value="{{ $pFormItem->id }}" {{ old('product_from', $product->product_from ?? '') == $pFormItem->id ? 'selected' : '' }}>
+                        {{ $pFormItem->product_form }}
+                    </option>
+                @endforeach
+            </select>
+            @error('product_from') <div class="dash-form-error">{{ $message }}</div> @enderror
+        </div>
+
+        <div class="col-md-2">
+            <label class="dash-form-label" for="sort_order">Sort Order</label>
+            <input type="number" min="0" class="dash-form-input @error('sort_order') is-invalid @enderror"
+                   name="sort_order" id="sort_order" value="{{ old('sort_order', $product->sort_order ?? 0) }}">
+            @error('sort_order') <div class="dash-form-error">{{ $message }}</div> @enderror
+        </div>
     </div>
 
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
-use App\Models\{Brand, Category, HealthConcern, Product};
+use App\Models\{Brand, Category, HealthConcern, Product, ProductForm};
 
 
 
@@ -104,8 +104,10 @@ class ProductController extends Controller
             ->get();
 
         $brands = Brand::where('status', true)->orderBy('sort_order')->orderBy('name')->get();
+        $productForms = ProductForm::where('isactive', true)->orderBy('product_form')->get();
+        $forWhomList = config('constants.for_whom', []);
 
-        return view('dashboard.products.create', compact('categories', 'brands'));
+        return view('dashboard.products.create', compact('categories', 'brands', 'productForms', 'forWhomList'));
     }
 
 
@@ -444,6 +446,8 @@ $updatedCount++;
             ->get();
 
         $brands = Brand::where('status', true)->orderBy('sort_order')->orderBy('name')->get();
+        $productForms = ProductForm::where('isactive', true)->orderBy('product_form')->get();
+        $forWhomList = config('constants.for_whom', []);
 
         $selectedCatId = old('cat_id', $product->cat_id);
         $subcategories = collect();
@@ -453,7 +457,7 @@ $updatedCount++;
                 ->get();
         }
 
-        return view('dashboard.products.edit', compact('product', 'categories', 'subcategories', 'brands'));
+        return view('dashboard.products.edit', compact('product', 'categories', 'subcategories', 'brands', 'productForms', 'forWhomList'));
     }
 
 
@@ -571,6 +575,11 @@ $updatedCount++;
             'ratingvalue' => 'nullable|numeric|min:0|max:5',
             'reviewcount' => 'nullable|integer|min:0',
             'viewed' => 'nullable|integer|min:0',
+
+            // New fields
+            'for_whom' => 'nullable|integer',
+            'product_from' => 'nullable|integer',
+            'sort_order' => 'nullable|integer|min:0',
         ];
     }
 

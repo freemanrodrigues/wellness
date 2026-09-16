@@ -110,6 +110,9 @@
                         <div class="col-md-2"><span style="color:#9ca3af;">Category</span><br>{{ $product->cat_id ?? '—' }}</div>
                         <div class="col-md-2"><span style="color:#9ca3af;">Sub-cat</span><br>{{ $product->subcat_id ?? '—' }}</div>
                         <div class="col-md-2"><span style="color:#9ca3af;">Brand</span><br>{{ $product->brand_id ?? '—' }}</div>
+                        <div class="col-md-3"><span style="color:#9ca3af;">For Whom</span><br>{{ config("constants.for_whom.{$product->for_whom}", '—') }}</div>
+                        <div class="col-md-3"><span style="color:#9ca3af;">Product Form</span><br>{{ $product->productForm->product_form ?? '—' }}</div>
+                        <div class="col-md-2"><span style="color:#9ca3af;">Sort Order</span><br>{{ $product->sort_order ?? 0 }}</div>
                     </div>
                 </div>
 
