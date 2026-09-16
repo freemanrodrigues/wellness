@@ -213,7 +213,7 @@ Mobile: Offcanvas Drawer with smooth accordions
 
         {{-- Miscellaneous ↓ --}}
         <div class="admin-mainnav__dropdown-wrap">
-            <button class="admin-mainnav__item {{ request()->routeIs('dashboard.category.*', 'dashboard.brand.*', 'dashboard.health-concern.*', 'dashboard.vpm.*') ? 'active' : '' }}"
+            <button class="admin-mainnav__item {{ request()->routeIs('dashboard.category.*', 'dashboard.brand.*', 'dashboard.health-concern.*', 'dashboard.product-form.*', 'dashboard.vpm.*') ? 'active' : '' }}"
                 type="button" aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-three-dots me-1"></i> Miscellaneous
                 <i class="bi bi-chevron-down admin-mainnav__caret"></i>
@@ -230,6 +230,10 @@ Mobile: Offcanvas Drawer with smooth accordions
                 <a href="{{ route('dashboard.health-concern.index') }}" class="admin-mainnav__dd-item">
                     <i class="bi bi-tags text-indigo"></i>
                     <div><span>HealthConcerns</span><small>Manage health concerns</small></div>
+                </a>
+                <a href="{{ route('dashboard.product-form.index') }}" class="admin-mainnav__dd-item">
+                    <i class="bi bi-capsule text-indigo"></i>
+                    <div><span>Product Forms</span><small>Manage product forms</small></div>
                 </a>
                 <a href="{{ route('dashboard.vpm.index') }}" class="admin-mainnav__dd-item">
                     <i class="bi bi-box-seam text-indigo"></i>

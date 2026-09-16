@@ -7,7 +7,7 @@ use App\Http\Controllers\Dashboard\BrandController;
 use App\Http\Controllers\Dashboard\HealthConcernController;
 use App\Http\Controllers\Dashboard\BlogController as DashboardBlogController;
 use App\Http\Controllers\BlogController;
-use App\Http\Controllers\Dashboard\{ScraperController, VendorProductManagementController};
+use App\Http\Controllers\Dashboard\{ScraperController, VendorProductManagementController, ProductFormController};
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
@@ -105,6 +105,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
         Route::resource('blog', DashboardBlogController::class);
         Route::post('blog/{id}/restore', [DashboardBlogController::class, 'restore'])->name('blog.restore');
+
+        Route::resource('product-form', ProductFormController::class);
+        Route::post('product-form/{id}/restore', [ProductFormController::class, 'restore'])->name('product-form.restore');
 
     });
 
