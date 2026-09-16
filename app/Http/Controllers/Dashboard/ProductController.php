@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 class ProductController extends Controller
 {
     /**
@@ -43,6 +44,14 @@ class ProductController extends Controller
 
         if ($subcatId = $request->input('subcat_id')) {
             $query->where('subcat_id', $subcatId);
+        }
+
+        if ($cid = $request->input('cid')) {
+            $query->where('cid', $cid);
+        }
+
+        if ($vid = $request->input('vid')) {
+            $query->where('vid', $vid);
         }
 
         if ($createdFrom = $request->input('created_from')) {
@@ -83,13 +92,18 @@ class ProductController extends Controller
             ->orderBy('name')
             ->get();
 
+        $cidList = Product::whereNotNull('cid')->distinct()->orderBy('cid')->pluck('cid');
+        $vidList = Product::whereNotNull('vid')->distinct()->orderBy('vid')->pluck('vid');
+
         return view('dashboard.products.index', compact(
             'products',
             'brands',
             'categories',
             'subcategories',
             'allSubcategories',
-            'healthConcerns'
+            'healthConcerns',
+            'cidList',
+            'vidList'
         ));
     }
 
@@ -433,6 +447,170 @@ $updatedCount++;
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export products to CSV format based on active filters.
+     */
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $query = Product::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('short_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('isactive')) {
+            $query->where('isactive', $request->boolean('isactive'));
+        }
+
+        if ($brandId = $request->input('brand_id')) {
+            $query->where('brand_id', $brandId);
+        }
+
+        if ($catId = $request->input('cat_id')) {
+            $query->where('cat_id', $catId);
+        }
+
+        if ($subcatId = $request->input('subcat_id')) {
+            $query->where('subcat_id', $subcatId);
+        }
+
+        if ($cid = $request->input('cid')) {
+            $query->where('cid', $cid);
+        }
+
+        if ($vid = $request->input('vid')) {
+            $query->where('vid', $vid);
+        }
+
+        if ($createdFrom = $request->input('created_from')) {
+            $query->whereDate('created_at', '>=', $createdFrom);
+        }
+
+        if ($createdTo = $request->input('created_to')) {
+            $query->whereDate('created_at', '<=', $createdTo);
+        }
+
+        if ($updatedFrom = $request->input('updated_from')) {
+            $query->whereDate('updated_at', '>=', $updatedFrom);
+        }
+
+        if ($updatedTo = $request->input('updated_to')) {
+            $query->whereDate('updated_at', '<=', $updatedTo);
+        }
+
+        $fileName = 'products_export_' . date('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            "Content-Type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=\"{$fileName}\"",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0",
+        ];
+
+        $columns = [
+            'id',
+            'name',
+            'short_name',
+            'vendor_product_name',
+            'short_description',
+            'description',
+            'info',
+            'use_case',
+            'price',
+            'discount',
+            'deliverycharge',
+            'vendorprice',
+            'vendordeliveryprice',
+            'more_price',
+            'isactive',
+            'imgurl',
+            'more_img',
+            'metatitle',
+            'metadesc',
+            'metakeyword',
+            'metaurl',
+            'cid',
+            'vid',
+            'cat_id',
+            'subcat_id',
+            'brand_id',
+            'vendor_code',
+            'sku',
+            'barcode',
+            'model_number',
+            'manufacturer_part_number',
+            'ratingvalue',
+            'reviewcount',
+            'viewed',
+            'for_whom',
+            'product_from',
+            'sort_order',
+            'created_at',
+            'updated_at',
+        ];
+
+        $callback = function () use ($query, $columns) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF"); // Output UTF-8 BOM
+            fputcsv($file, $columns);
+
+            $query->orderBy('id')->chunk(500, function ($items) use ($file) {
+                foreach ($items as $item) {
+                    fputcsv($file, [
+                        $item->id,
+                        $item->name,
+                        $item->short_name,
+                        $item->vendor_product_name,
+                        $item->short_description,
+                        $item->description,
+                        $item->info,
+                        $item->use_case,
+                        $item->price,
+                        $item->discount,
+                        $item->deliverycharge,
+                        $item->vendorprice,
+                        $item->vendordeliveryprice,
+                        $item->more_price,
+                        $item->isactive ? 1 : 0,
+                        $item->imgurl,
+                        $item->more_img,
+                        $item->metatitle,
+                        $item->metadesc,
+                        $item->metakeyword,
+                        $item->metaurl,
+                        $item->cid,
+                        $item->vid,
+                        $item->cat_id,
+                        $item->subcat_id,
+                        $item->brand_id,
+                        $item->vendor_code,
+                        $item->sku,
+                        $item->barcode,
+                        $item->model_number,
+                        $item->manufacturer_part_number,
+                        $item->ratingvalue,
+                        $item->reviewcount,
+                        $item->viewed,
+                        $item->for_whom,
+                        $item->product_from,
+                        $item->sort_order,
+                        $item->created_at ? $item->created_at->toDateTimeString() : '',
+                        $item->updated_at ? $item->updated_at->toDateTimeString() : '',
+                    ]);
+                }
+            });
+
+            fclose($file);
+        };
+
+        return new StreamedResponse($callback, 200, $headers);
     }
 
     /**
@@ -784,6 +962,100 @@ $updatedCount++;
             'category' => $nav['categories'],
             'subcategory' => $nav['subcategories'],
             //    'healthConcern' => $healthConcern,
+            'healthConditions' => $healthConditions,
+            'brandList' => $brandList,
+        ]);
+    }
+
+    /**
+     * Frontend search action.
+     * Logic:
+     * 1. Search column `name` (exact match on top, then partial match).
+     * 2. If no record found in `name`, search column `description`.
+     * 3. If no record found in `description`, search by `health_concerns` name.
+     */
+    public function search(Request $request): View
+    {
+        $keyword = trim($request->get('q', ''));
+        $sort = $request->get('sort', 'newest');
+
+        $query = null;
+        $nameMatchesExist = false;
+
+        if ($keyword !== '') {
+            // 1. Search in column `name`
+            $nameMatchesExist = Product::where('isactive', 1)
+                ->where('name', 'like', "%{$keyword}%")
+                ->exists();
+
+            if ($nameMatchesExist) {
+                $query = Product::where('isactive', 1)
+                    ->where('name', 'like', "%{$keyword}%");
+
+                if ($sort === 'newest') {
+                    // Exact name match on top, then partial match, then newest
+                    $query->orderByRaw(
+                        "CASE WHEN LOWER(name) = ? THEN 1 WHEN LOWER(name) LIKE ? THEN 2 ELSE 3 END",
+                        [strtolower($keyword), strtolower($keyword) . '%']
+                    )->orderByDesc('created_at');
+                }
+            } else {
+                // 2. If no record found in `name`, search in `description`
+                $descMatchesExist = Product::where('isactive', 1)
+                    ->where('description', 'like', "%{$keyword}%")
+                    ->exists();
+
+                if ($descMatchesExist) {
+                    $query = Product::where('isactive', 1)
+                        ->where('description', 'like', "%{$keyword}%");
+                } else {
+                    // 3. If no record in description, search by `health_concerns` name
+                    $matchingHealthConcern = HealthConcern::where('status', 1)
+                        ->where(function ($q) use ($keyword) {
+                            $q->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('slug', 'like', "%{$keyword}%");
+                        })
+                        ->first();
+
+                    if ($matchingHealthConcern) {
+                        $query = $matchingHealthConcern->products()->where('isactive', 1);
+                    }
+                }
+            }
+        }
+
+        if (!$query) {
+            // No keyword or no matching records found
+            $query = Product::whereRaw('1 = 0');
+        }
+
+        // Apply sorting dropdown if selected
+        if ($sort !== 'newest' || !$nameMatchesExist) {
+            match ($sort) {
+                'price_low' => $query->orderBy('price', 'asc'),
+                'price_high' => $query->orderBy('price', 'desc'),
+                'reviews' => $query->orderByDesc('reviews_count'),
+                default => $query->orderByDesc('created_at'),
+            };
+        }
+
+        $products = $query->paginate(24)->withQueryString();
+
+        $meta = [
+            'title' => $keyword !== '' ? 'Search results for "' . $keyword . '"' : 'Search Products',
+            'description' => $keyword !== '' ? 'Search results for ' . $keyword : 'Search products across our catalog.',
+        ];
+
+        $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+
+        return view('products.product-listing', [
+            'products' => $products,
+            'meta' => $meta,
+            'sort' => $sort,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
             'healthConditions' => $healthConditions,
             'brandList' => $brandList,
         ]);

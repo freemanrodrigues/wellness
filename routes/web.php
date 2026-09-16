@@ -41,6 +41,8 @@ Route::get('/health/{slug}', [ProductController::class, 'productListingByHealthC
 Route::get('/brand/{slug}', [ProductController::class, 'productListingByBrand'])
     ->name('brand.products');
 
+Route::get('/search', [ProductController::class, 'search'])->name('search');
+
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{url}', [BlogController::class, 'show'])->name('blog.show');
 
@@ -89,6 +91,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::get('products/sample-csv', [ProductController::class, 'downloadSampleCsv'])->name('products.sample-csv');
         Route::post('products/{product}/assign-health-concerns', [ProductController::class, 'assignHealthConcerns'])->name('products.assign-health-concerns');
         Route::get('get-subcategories/{parentId}', [ProductController::class, 'getSubcategories'])->name('get-subcategories');
+        Route::get('products/export', [ProductController::class, 'exportCsv'])->name('products.export');
         Route::resource('products', ProductController::class);
         Route::resource('category', CategoryController::class);
         Route::post('category/{id}/restore', [CategoryController::class, 'restore'])->name('category.restore');

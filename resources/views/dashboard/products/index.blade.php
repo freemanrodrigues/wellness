@@ -29,6 +29,11 @@
         <div class="dash-page-header">
             <h1 class="dash-page-title">Products</h1>
             <div class="d-flex gap-2">
+                <a href="{{ route('dashboard.products.export', request()->query()) }}"
+                    class="btn btn-outline-primary btn-sm px-3 fw-bold d-inline-flex align-items-center"
+                    id="btnExportProductCsv">
+                    <i class="bi bi-download me-1"></i> Export CSV
+                </a>
                 <a href="{{ route('dashboard.products.import') }}"
                     class="btn btn-outline-success btn-sm px-3 fw-bold d-inline-flex align-items-center"
                     id="btnImportProductCsv">
@@ -106,6 +111,36 @@
                     </select>
                 </div>
 
+                {{-- Company (CID) --}}
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1 fw-medium">Company (CID)</label>
+                    <select name="cid" class="form-select form-select-sm" id="cidFilter">
+                        <option value="">All Companies</option>
+                        @if(isset($cidList))
+                            @foreach($cidList as $cidVal)
+                                <option value="{{ $cidVal }}" {{ request('cid') == $cidVal ? 'selected' : '' }}>
+                                    CID: {{ $cidVal }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
+                {{-- Vendor (VID) --}}
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1 fw-medium">Vendor (VID)</label>
+                    <select name="vid" class="form-select form-select-sm" id="vidFilter">
+                        <option value="">All Vendors</option>
+                        @if(isset($vidList))
+                            @foreach($vidList as $vidVal)
+                                <option value="{{ $vidVal }}" {{ request('vid') == $vidVal ? 'selected' : '' }}>
+                                    VID: {{ $vidVal }}
+                                </option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+
                 {{-- Created Date Range --}}
                 <div class="col-md-2">
                     <label class="form-label small text-muted mb-1 fw-medium">Created From</label>
@@ -127,11 +162,14 @@
                 </div>
 
                 {{-- Buttons --}}
-                <div class="col-md-2 d-flex align-items-end gap-2 mt-auto">
-                    <button type="submit" class="btn btn-primary btn-sm px-3 w-100 fw-semibold">
+                <div class="col-md-4 d-flex align-items-end gap-2 mt-auto">
+                    <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">
                         <i class="bi bi-funnel me-1"></i> Filter
                     </button>
-                    @if(request()->hasAny(['search', 'isactive', 'cat_id', 'subcat_id', 'brand_id', 'created_from', 'created_to', 'updated_from', 'updated_to']))
+                    <button type="submit" formaction="{{ route('dashboard.products.export') }}" class="btn btn-outline-primary btn-sm px-3 fw-semibold" title="Export filtered products to CSV">
+                        <i class="bi bi-download me-1"></i> Export
+                    </button>
+                    @if(request()->hasAny(['search', 'isactive', 'cat_id', 'subcat_id', 'brand_id', 'cid', 'vid', 'created_from', 'created_to', 'updated_from', 'updated_to']))
                         <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary btn-sm px-3">Clear</a>
                     @endif
                 </div>
