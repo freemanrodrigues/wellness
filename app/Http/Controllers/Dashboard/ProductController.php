@@ -830,7 +830,9 @@ $updatedCount++;
         // $product = Product::with(['category.parent', 'variants', 'reviews', 'images'])
         //     ->where('slug', $slug)->firstOrFail();
 
-        $product = Product::where('metaurl', $slug)->firstOrFail();
+        $product = Product::with(['category', 'subcategory', 'brand', 'productForm'])
+            ->where('metaurl', $slug)
+            ->firstOrFail();
         //dd($product);
         /*
         $product = (object) [

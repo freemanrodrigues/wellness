@@ -23,13 +23,22 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item">
-                <a href="" class="text-decoration-none">
-                    {{-- $product->category->name --}}
-                </a>
-            </li>
+            @if(!empty($product->category))
+                <li class="breadcrumb-item">
+                    <a href="{{ route('product-listing.category', $product->category->slug ?? $product->category->name) }}" class="text-decoration-none">
+                        {{ $product->category->name }}
+                    </a>
+                </li>
+            @endif
+            @if(!empty($product->subcategory))
+                <li class="breadcrumb-item">
+                    <a href="{{ route('product-listing.subcategory', ['category' => $product->category->slug ?? $product->category->name ?? 'all', 'subcategory' => $product->subcategory->slug ?? $product->subcategory->name]) }}" class="text-decoration-none">
+                        {{ $product->subcategory->name }}
+                    </a>
+                </li>
+            @endif
             <li class="breadcrumb-item active" aria-current="page">
-                {{-- $product->subcategory->name --}}
+                {{ $product->name }}
             </li>
         </ol>
     </nav>
@@ -142,6 +151,31 @@
                 @endif
 
 
+                {{-- Product Attributes: Product Form, Brand, For Whom --}}
+                <div class="mb-3">
+                    @if (!empty($product->productForm->product_form))
+                        <p class="mb-2 text-muted">
+                            <span class="fw-semibold text-dark">Product Form:</span> {{ $product->productForm->product_form }}
+                        </p>
+                    @elseif (!empty($product->product_from))
+                        <p class="mb-2 text-muted">
+                            <span class="fw-semibold text-dark">Product Form:</span> {{ $product->product_from }}
+                        </p>
+                    @endif
+
+                    @if (!empty($product->brand))
+                        <p class="mb-2 text-muted">
+                            <span class="fw-semibold text-dark">Brand:</span> {{ is_object($product->brand) ? $product->brand->name : $product->brand }}
+                        </p>
+                    @endif
+
+                    @if (!empty($product->for_whom) && config("constants.for_whom.{$product->for_whom}"))
+                        <p class="mb-2 text-muted">
+                            <span class="fw-semibold text-dark">For Whom:</span> {{ config("constants.for_whom.{$product->for_whom}") }}
+                        </p>
+                    @endif
+                </div>
+
                 {{-- Quantity --}}
                 <div class="mb-4">
                     <label for="quantity" class="form-label fw-semibold">Quantity</label>
@@ -151,13 +185,6 @@
                         <button type="button" class="btn btn-outline-secondary" id="qtyPlus">&plus;</button>
                     </div>
                 </div>
-
-                {{-- Brand --}}
-                @if (!empty($product->brand))
-                    <p class="text-muted mb-4">
-                        <span class="fw-semibold">Brand:</span> {{ $product->brand }}
-                    </p>
-                @endif
 
                 <div class="d-flex align-items-center gap-2 mb-3 flex-wrap" id="cartActionGroup">
                     <button type="button" class="btn btn-primary px-4 py-2" id="addToCartBtn" style="min-width: 160px;">
