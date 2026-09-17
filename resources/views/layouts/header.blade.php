@@ -354,9 +354,14 @@
         /* Mega menu */
         .pf-megamenu {
             border-radius: .5rem;
-            min-width: 200px;
+            min-width: 680px;
+            max-width: 90vw;
             margin-top: 0 !important;
             border-top: 2px solid #1a6644 !important;
+        }
+
+        .pf-megamenu--single {
+            min-width: 240px;
         }
 
         .pf-megamenu__heading {
@@ -374,12 +379,25 @@
             font-size: .84rem;
             color: #444;
             text-decoration: none;
-            padding: .35rem 0;
+            padding: .3rem 0;
             transition: color .15s;
         }
 
         .pf-megamenu__link:hover {
             color: #1a6644;
+        }
+
+        .pf-megamenu__more-link {
+            display: inline-block;
+            font-size: .8rem;
+            font-weight: 600;
+            color: #1a6644;
+            padding-top: .25rem;
+            text-decoration: none;
+        }
+
+        .pf-megamenu__more-link:hover {
+            text-decoration: underline;
         }
 
         /* ═══════════════════════════════════════════════════

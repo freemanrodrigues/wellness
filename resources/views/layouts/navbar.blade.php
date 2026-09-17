@@ -153,65 +153,138 @@ SITE HEADER WRAPPER (sticky, two rows)
 
                 {{-- Nutrition & Diet --}}
 
-                `@if(!empty($category))
+                @if(!empty($category))
                     @foreach ($category as $k => $cat)
-
                         <li class="pf-cat-item dropdown">
                             <a class="pf-cat-link dropdown-toggle"
-                                href="/category/{{ strtolower(str_replace(' ', '-', $cat->name))}}" data-bs-toggle="dropdown"
+                                href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}" data-bs-toggle="dropdown"
                                 aria-expanded="false">
                                 {{ $cat->name}}
                             </a>
                             <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
-                                <a href="/category/{{ strtolower(str_replace(' ', '-', $cat->name))}}">
-                                    <p class="pf-megamenu__heading">{{ $cat->name}}
-                                    </p>
-                                </a>
-                                <ul class="list-unstyled">
-                                    @if (isset($subcategory[$cat->id]) && !empty($subcategory[$cat->id]))
-                                        @foreach ($subcategory[$cat->id] as $sub)
-                                            <li><a class="pf-megamenu__link"
-                                                    href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug))}}/{{  strtolower(str_replace(' ', '-', $sub['slug'])) }}">
-                                                    {{ $sub['name'] }}</a></li>
-                                        @endforeach
+                                <div class="row g-4">
+                                    {{-- Column 1: Subcategories (Max 12 items) --}}
+                                    <div class="col-md-4">
+                                        <a href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}" class="text-decoration-none">
+                                            <p class="pf-megamenu__heading">{{ $cat->name }}</p>
+                                        </a>
+                                        <ul class="list-unstyled mb-0">
+                                            @if (isset($subcategory[$cat->id]) && !empty($subcategory[$cat->id]))
+                                                @php
+                                                    $subList = $subcategory[$cat->id];
+                                                    $subCount = count($subList);
+                                                    $subSlice = array_slice($subList, 0, 12);
+                                                @endphp
+                                                @foreach ($subSlice as $sub)
+                                                    <li>
+                                                        <a class="pf-megamenu__link"
+                                                            href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug))}}/{{ strtolower(str_replace(' ', '-', $sub['slug'])) }}">
+                                                            {{ $sub['name'] }}
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                                @if ($subCount > 12)
+                                                    <li>
+                                                        <a class="pf-megamenu__more-link"
+                                                           href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}">
+                                                            + View All ({{ $subCount }})
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            @else
+                                                <li><span class="text-muted small">No subcategories</span></li>
+                                            @endif
+                                        </ul>
+                                    </div>
+
+                                    {{-- Column 2: Health Concerns (Max 12 items) --}}
+                                    @if(isset($healthConditions) && count($healthConditions) > 0)
+                                        <div class="col-md-4">
+                                            <p class="pf-megamenu__heading">By Health Concern</p>
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach($healthConditions->take(12) as $hc)
+                                                    <li>
+                                                        <a class="pf-megamenu__link" href="/health/{{ $hc->slug }}">
+                                                            {{ $hc->name }}
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                                @if(count($healthConditions) > 12)
+                                                    <li>
+                                                        <a class="pf-megamenu__more-link" href="#">
+                                                            + View All ({{ count($healthConditions) }})
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
                                     @endif
-                                </ul>
+
+                                    {{-- Column 3: Brand / Company (Max 12 items) --}}
+                                    @if(isset($brandList) && count($brandList) > 0)
+                                        <div class="col-md-4">
+                                            <p class="pf-megamenu__heading">By Brand / Company</p>
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach($brandList->take(12) as $brand)
+                                                    <li>
+                                                        <a class="pf-megamenu__link" href="/brand/{{ $brand->slug }}">
+                                                            {{ $brand->name }}
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                                @if(count($brandList) > 12)
+                                                    <li>
+                                                        <a class="pf-megamenu__more-link" href="#">
+                                                            + View All ({{ count($brandList) }})
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </li>
                     @endforeach
                 @endif
                 @if(isset($healthConditions) && !empty($healthConditions))
                     <li class="pf-cat-item dropdown">
-                        <a href="/health-conditions" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
+                        <a href="#" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
                             aria-expanded="false">Health Conditions</a>
-                        <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
-                            <a href="/health-conditions">
-                                <p class="pf-megamenu__heading">Health Conditions</p>
-                            </a>
-                            <ul class="list-unstyled">
-                                @foreach($healthConditions as $hc)
+                        <div class="dropdown-menu pf-megamenu pf-megamenu--single shadow-lg border-0 p-4">
+                            <p class="pf-megamenu__heading">Health Conditions</p>
+                            <ul class="list-unstyled mb-0">
+                                @foreach($healthConditions->take(12) as $hc)
                                     <li>
                                         <a class="pf-megamenu__link" href="/health/{{ $hc->slug }}">{{ $hc->name }}</a>
                                     </li>
                                 @endforeach
+                                @if(count($healthConditions) > 12)
+                                    <li>
+                                        <a class="pf-megamenu__more-link" href="#">+ View All ({{ count($healthConditions) }})</a>
+                                    </li>
+                                @endif
                             </ul>
                         </div>
                     </li>
                 @endif
                 @if(isset($brandList) && !empty($brandList))
                     <li class="pf-cat-item dropdown">
-                        <a href="/health-conditions" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
+                        <a href="#" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
                             aria-expanded="false">Shop By Brand</a>
-                        <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
-                            <a href="/health-conditions">
-                                <p class="pf-megamenu__heading">Shop By Brand</p>
-                            </a>
-                            <ul class="list-unstyled">
-                                @foreach($brandList as $brand)
+                        <div class="dropdown-menu pf-megamenu pf-megamenu--single shadow-lg border-0 p-4">
+                            <p class="pf-megamenu__heading">Shop By Brand</p>
+                            <ul class="list-unstyled mb-0">
+                                @foreach($brandList->take(12) as $brand)
                                     <li>
                                         <a class="pf-megamenu__link" href="/brand/{{ $brand->slug }}">{{ $brand->name }}</a>
                                     </li>
                                 @endforeach
+                                @if(count($brandList) > 12)
+                                    <li>
+                                        <a class="pf-megamenu__more-link" href="#">+ View All ({{ count($brandList) }})</a>
+                                    </li>
+                                @endif
                             </ul>
                         </div>
                     </li>
