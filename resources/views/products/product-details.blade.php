@@ -220,6 +220,39 @@
                     @endif
                 </p>
 
+                <!-- Trust Badges Infographic -->
+                <div class="trust-badge-card mt-3 p-3 rounded-3 border shadow-sm">
+                    <div class="row g-2 text-center align-items-center">
+                        <div class="col-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="trust-badge-icon-wrap mb-2 text-primary bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-clock-history fs-5"></i>
+                                </div>
+                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">Assured / On-Time</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">Delivery</span>
+                            </div>
+                        </div>
+                        <div class="col-4 border-start border-end">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="trust-badge-icon-wrap mb-2 text-primary bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-paypal fs-5" style="color: #003087;"></i>
+                                </div>
+                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">Guarantee by</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">PayPal</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="trust-badge-icon-wrap mb-2 text-success bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-shield-lock-fill fs-5"></i>
+                                </div>
+                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">100% Secure</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">Transactions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             @endif
 
         </div>
@@ -338,6 +371,27 @@
             background-color: #0d6efd;
             color: #fff;
             border-color: #0d6efd;
+        }
+
+        .trust-badge-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0 !important;
+            transition: all 0.3s ease;
+        }
+
+        .trust-badge-card:hover {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .trust-badge-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.25 ease, box-shadow 0.25s ease;
+        }
+
+        .trust-badge-card:hover .trust-badge-icon-wrap {
+            transform: translateY(-2px);
         }
     </style>
 @endpush

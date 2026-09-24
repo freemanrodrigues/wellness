@@ -41,6 +41,10 @@ Route::get('/health/{slug}', [ProductController::class, 'productListingByHealthC
 Route::get('/brand/{slug}', [ProductController::class, 'productListingByBrand'])
     ->name('brand.products');
 
+Route::get('/brandlist', [MainController::class, 'brandlist'])->name('brandlist');
+
+Route::get('/shop-by-health-concerns', [MainController::class, 'shopByHealthConcerns'])->name('shop-by-health-concerns');
+
 Route::get('/search', [ProductController::class, 'search'])->name('search');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');

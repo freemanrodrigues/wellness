@@ -190,4 +190,62 @@ class MainController extends Controller
 
         return view('test', ['meta' => $meta]);
     }
+
+    /**
+     * Display all active brands listing page.
+     */
+    public function brandlist(): View
+    {
+        $meta = [
+            'title' => 'Shop By Brand - All Brands',
+            'description' => 'Browse all top quality health, wellness, and organic brands. Find products from your favorite trusted manufacturers.',
+        ];
+
+        $brands = Brand::where('status', 1)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+
+        return view('brandlist', [
+            'meta' => $meta,
+            'brands' => $brands,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
+            'healthConditions' => $healthConditions,
+            'brandList' => $brandList,
+        ]);
+    }
+
+    /**
+     * Display all active health concerns listing page.
+     */
+    public function shopByHealthConcerns(): View
+    {
+        $meta = [
+            'title' => 'Shop By Health Concern - All Conditions',
+            'description' => 'Browse wellness products, natural remedies, and ayurvedic formulations targeted for specific health conditions and concerns.',
+        ];
+
+        $healthConcernsList = HealthConcern::where('status', 1)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        $nav = Category::getTopCategoriesWithSubcategories();
+        $healthConditions = HealthConcern::getAllActiveHealthConcerns();
+        $brandList = Brand::getAllActiveBrands();
+
+        return view('shop-by-health-concerns', [
+            'meta' => $meta,
+            'healthConcernsList' => $healthConcernsList,
+            'category' => $nav['categories'],
+            'subcategory' => $nav['subcategories'],
+            'healthConditions' => $healthConditions,
+            'brandList' => $brandList,
+        ]);
+    }
 }

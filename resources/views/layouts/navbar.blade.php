@@ -200,7 +200,9 @@ SITE HEADER WRAPPER (sticky, two rows)
                                     {{-- Column 2: Health Concerns (Max 12 items) --}}
                                     @if(isset($healthConditions) && count($healthConditions) > 0)
                                         <div class="col-md-4">
-                                            <p class="pf-megamenu__heading">By Health Concern</p>
+                                            <a href="{{ url('/shop-by-health-concerns') }}" class="text-decoration-none">
+                                                <p class="pf-megamenu__heading">By Health Concern</p>
+                                            </a>
                                             <ul class="list-unstyled mb-0">
                                                 @foreach($healthConditions->take(12) as $hc)
                                                     <li>
@@ -211,7 +213,7 @@ SITE HEADER WRAPPER (sticky, two rows)
                                                 @endforeach
                                                 @if(count($healthConditions) > 12)
                                                     <li>
-                                                        <a class="pf-megamenu__more-link" href="#">
+                                                        <a class="pf-megamenu__more-link" href="{{ url('/shop-by-health-concerns') }}">
                                                             + View All ({{ count($healthConditions) }})
                                                         </a>
                                                     </li>
@@ -223,7 +225,9 @@ SITE HEADER WRAPPER (sticky, two rows)
                                     {{-- Column 3: Brand / Company (Max 12 items) --}}
                                     @if(isset($brandList) && count($brandList) > 0)
                                         <div class="col-md-4">
-                                            <p class="pf-megamenu__heading">By Brand / Company</p>
+                                            <a href="{{ url('/brandlist') }}" class="text-decoration-none">
+                                                <p class="pf-megamenu__heading">By Brand / Company</p>
+                                            </a>
                                             <ul class="list-unstyled mb-0">
                                                 @foreach($brandList->take(12) as $brand)
                                                     <li>
@@ -234,7 +238,7 @@ SITE HEADER WRAPPER (sticky, two rows)
                                                 @endforeach
                                                 @if(count($brandList) > 12)
                                                     <li>
-                                                        <a class="pf-megamenu__more-link" href="#">
+                                                        <a class="pf-megamenu__more-link" href="{{ url('/brandlist') }}">
                                                             + View All ({{ count($brandList) }})
                                                         </a>
                                                     </li>
@@ -252,7 +256,9 @@ SITE HEADER WRAPPER (sticky, two rows)
                         <a href="#" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
                             aria-expanded="false">Health Conditions</a>
                         <div class="dropdown-menu pf-megamenu pf-megamenu--single shadow-lg border-0 p-4">
-                            <p class="pf-megamenu__heading">Health Conditions</p>
+                            <a href="{{ url('/shop-by-health-concerns') }}" class="text-decoration-none">
+                                <p class="pf-megamenu__heading">Health Conditions</p>
+                            </a>
                             <ul class="list-unstyled mb-0">
                                 @foreach($healthConditions->take(12) as $hc)
                                     <li>
@@ -261,7 +267,7 @@ SITE HEADER WRAPPER (sticky, two rows)
                                 @endforeach
                                 @if(count($healthConditions) > 12)
                                     <li>
-                                        <a class="pf-megamenu__more-link" href="#">+ View All ({{ count($healthConditions) }})</a>
+                                        <a class="pf-megamenu__more-link" href="{{ url('/shop-by-health-concerns') }}">+ View All ({{ count($healthConditions) }})</a>
                                     </li>
                                 @endif
                             </ul>
@@ -273,7 +279,9 @@ SITE HEADER WRAPPER (sticky, two rows)
                         <a href="#" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
                             aria-expanded="false">Shop By Brand</a>
                         <div class="dropdown-menu pf-megamenu pf-megamenu--single shadow-lg border-0 p-4">
-                            <p class="pf-megamenu__heading">Shop By Brand</p>
+                            <a href="{{ url('/brandlist') }}" class="text-decoration-none">
+                                <p class="pf-megamenu__heading">Shop By Brand</p>
+                            </a>
                             <ul class="list-unstyled mb-0">
                                 @foreach($brandList->take(12) as $brand)
                                     <li>
@@ -282,7 +290,7 @@ SITE HEADER WRAPPER (sticky, two rows)
                                 @endforeach
                                 @if(count($brandList) > 12)
                                     <li>
-                                        <a class="pf-megamenu__more-link" href="#">+ View All ({{ count($brandList) }})</a>
+                                        <a class="pf-megamenu__more-link" href="{{ url('/brandlist') }}">+ View All ({{ count($brandList) }})</a>
                                     </li>
                                 @endif
                             </ul>
