@@ -213,12 +213,16 @@ Mobile: Offcanvas Drawer with smooth accordions
 
         {{-- Miscellaneous ↓ --}}
         <div class="admin-mainnav__dropdown-wrap">
-            <button class="admin-mainnav__item {{ request()->routeIs('dashboard.category.*', 'dashboard.brand.*', 'dashboard.health-concern.*', 'dashboard.product-form.*', 'dashboard.vpm.*') ? 'active' : '' }}"
+            <button class="admin-mainnav__item {{ request()->routeIs('dashboard.category.*', 'dashboard.brand.*', 'dashboard.health-concern.*', 'dashboard.product-form.*', 'dashboard.vpm.*', 'dashboard.faq-qna.*') ? 'active' : '' }}"
                 type="button" aria-haspopup="true" aria-expanded="false">
                 <i class="bi bi-three-dots me-1"></i> Miscellaneous
                 <i class="bi bi-chevron-down admin-mainnav__caret"></i>
             </button>
             <div class="admin-mainnav__dropdown">
+                <a href="{{ route('dashboard.faq-qna.index') }}" class="admin-mainnav__dd-item">
+                    <i class="bi bi-question-square text-indigo"></i>
+                    <div><span>FAQ &amp; Q&amp;A</span><small>Manage FAQs &amp; product questions</small></div>
+                </a>
                 <a href="{{ route('dashboard.category.index') }}" class="admin-mainnav__dd-item">
                     <i class="bi bi-tags text-indigo"></i>
                     <div><span>Categories</span><small>Manage product categories</small></div>
@@ -411,10 +415,14 @@ Mobile: Offcanvas Drawer with smooth accordions
                     </button>
                 </h2>
                 <div id="mobileMisc"
-                    class="accordion-collapse collapse {{ request()->routeIs('dashboard.category.*', 'dashboard.brand.*', 'dashboard.health-concern.*', 'dashboard.vpm.*') ? 'show' : '' }}"
+                    class="accordion-collapse collapse {{ request()->routeIs('dashboard.category.*', 'dashboard.brand.*', 'dashboard.health-concern.*', 'dashboard.vpm.*', 'dashboard.faq-qna.*') ? 'show' : '' }}"
                     data-bs-parent="#adminMobileAccordion">
                     <div class="accordion-body p-0 bg-light">
                         <div class="list-group list-group-flush">
+                            <a href="{{ route('dashboard.faq-qna.index') }}"
+                                class="list-group-item list-group-item-action bg-transparent border-0 ps-4 py-2 {{ request()->routeIs('dashboard.faq-qna.*') ? 'fw-bold text-primary' : '' }}">
+                                <i class="bi bi-question-square me-2" style="color:#6366f1;"></i> FAQ &amp; Q&amp;A
+                            </a>
                             <a href="{{ route('dashboard.category.index') }}"
                                 class="list-group-item list-group-item-action bg-transparent border-0 ps-4 py-2 {{ request()->routeIs('dashboard.category.*') ? 'fw-bold text-primary' : '' }}">
                                 <i class="bi bi-tags me-2" style="color:#6366f1;"></i> Categories

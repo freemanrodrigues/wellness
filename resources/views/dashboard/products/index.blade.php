@@ -198,7 +198,12 @@
                 <tbody>
                     @forelse ($products as $product)
                         <tr>
-                            <td class="text-muted" style="font-size:.78rem;">{{ $product->id }}</td>
+                            <td style="font-size:.78rem;">
+                                <a href="{{ route('product-details', $product->metaurl ?? $product->id) }}" target="_blank" class="text-decoration-none fw-semibold text-primary d-inline-flex align-items-center gap-1" title="View product page on website">
+                                    #{{ $product->id }}
+                                    <i class="bi bi-box-arrow-up-right" style="font-size:0.65rem;"></i>
+                                </a>
+                            </td>
                             <td>
                                 @if ($product->imgurl)
                                     <img src="{{ asset('images/products/' . $product->imgurl) }}" alt="{{ $product->name }}"
@@ -267,6 +272,8 @@
                                         </svg>
                                     </a>
                                     <button type="button" class="btn-dash-secondary open-hc-modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#assignHealthConcernModal"
                                         style="padding:.3rem .6rem; color:#0d6efd;"
                                         title="Assign Health Concern"
                                         data-product-id="{{ $product->id }}"
@@ -274,6 +281,15 @@
                                         data-health-concerns="{{ json_encode($product->healthConcerns->pluck('id')) }}"
                                         data-action="{{ route('dashboard.products.assign-health-concerns', $product) }}">
                                         <i class="bi bi-heart-pulse-fill"></i>
+                                    </button>
+                                    <button type="button" class="btn-dash-secondary open-faq-modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addProductFaqModal"
+                                        style="padding:.3rem .6rem; color:#198754;"
+                                        title="Add FAQ"
+                                        data-product-id="{{ $product->id }}"
+                                        data-product-name="{{ e($product->name) }}">
+                                        <i class="bi bi-question-circle-fill"></i>
                                     </button>
                                     <form method="POST" action="{{ route('dashboard.products.destroy', $product) }}"
                                         onsubmit="return confirm('Delete this product?')">
@@ -357,12 +373,104 @@
             </div>
         </div>
 
+        {{-- Add Product FAQ Modal --}}
+        <div class="modal fade" id="addProductFaqModal" tabindex="-1" aria-labelledby="addProductFaqModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow">
+                    <form id="addProductFaqForm" method="POST" action="{{ route('dashboard.faq-qna.store') }}">
+                        @csrf
+                        <input type="hidden" name="type" value="faq">
+                        <input type="hidden" name="redirect_back" value="1">
+                        <input type="hidden" name="product_id" id="faqModalProductId" value="">
+                        
+                        <div class="modal-header bg-light">
+                            <h5 class="modal-title fw-bold text-dark" id="addProductFaqModalLabel">
+                                <i class="bi bi-question-circle-fill text-success me-2"></i>Add Product FAQ
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4" style="max-height:70vh; overflow-y:auto;">
+                            <div class="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center" role="alert">
+                                <i class="bi bi-info-circle me-2 fs-6"></i>
+                                <div>Product: <strong id="faqModalProductName" class="text-dark"></strong></div>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" name="is_active" value="1" id="faqModalIsActive" checked>
+                                <label class="form-check-label fw-semibold text-dark" for="faqModalIsActive">Publish immediately (Active)</label>
+                            </div>
+
+                            <div id="faqModalItemsContainer">
+                                {{-- First FAQ Item --}}
+                                <div class="faq-modal-item card mb-3 border p-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-primary faq-item-number">FAQ #1</span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-faq-btn d-none" onclick="removeModalFaqBlock(this)">
+                                            <i class="bi bi-trash"></i> Remove
+                                        </button>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold text-dark">Question <span class="text-danger">*</span></label>
+                                        <textarea name="faqs[0][question]" class="form-control form-control-sm" rows="2" placeholder="e.g. How to use this product?" required></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-semibold text-dark">Answer / Response</label>
+                                        <textarea name="faqs[0][answer]" class="form-control form-control-sm" rows="3" placeholder="Enter answer details..."></textarea>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4">
+                                            <label class="form-label small text-muted mb-0">Sort Order</label>
+                                            <input type="number" name="faqs[0][sort_order]" class="form-control form-control-sm" value="0" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-success btn-sm fw-semibold" id="btnAddMoreFaqModal">
+                                <i class="bi bi-plus-circle me-1"></i> Add One More Question
+                            </button>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success btn-sm px-4 fw-bold">
+                                <i class="bi bi-check-lg me-1"></i> Save FAQ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>{{-- /.dash-wrapper --}}
 
 @include('layouts.dash_styles')
 
 <script>
+function removeModalFaqBlock(btn) {
+    const item = btn.closest('.faq-modal-item');
+    if (item) {
+        item.remove();
+        updateModalFaqNumbers();
+    }
+}
+
+function updateModalFaqNumbers() {
+    const items = document.querySelectorAll('#faqModalItemsContainer .faq-modal-item');
+    items.forEach((item, index) => {
+        const badge = item.querySelector('.faq-item-number');
+        if (badge) badge.textContent = `FAQ #${index + 1}`;
+        const removeBtn = item.querySelector('.remove-faq-btn');
+        if (removeBtn) {
+            if (items.length > 1) {
+                removeBtn.classList.remove('d-none');
+            } else {
+                removeBtn.classList.add('d-none');
+            }
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     // Dynamic Subcategory filtering based on Category selection
     const catSelect = document.getElementById('catFilter');
@@ -388,7 +496,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Assign Health Concern Modal handling
     const hcModalEl = document.getElementById('assignHealthConcernModal');
     if (hcModalEl) {
-        const hcModal = new bootstrap.Modal(hcModalEl);
         const hcForm = document.getElementById('assignHealthConcernForm');
         const modalProdName = document.getElementById('modalProductName');
         const hcCheckboxes = document.querySelectorAll('.hc-checkbox');
@@ -404,16 +511,105 @@ document.addEventListener('DOMContentLoaded', function () {
                     assignedHcIds = [];
                 }
 
-                modalProdName.textContent = prodName;
-                hcForm.action = actionUrl;
+                if (modalProdName) modalProdName.textContent = prodName;
+                if (hcForm) hcForm.action = actionUrl;
 
                 hcCheckboxes.forEach(cb => {
                     cb.checked = assignedHcIds.includes(parseInt(cb.value)) || assignedHcIds.includes(cb.value);
                 });
 
-                hcModal.show();
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const hcModal = bootstrap.Modal.getOrCreateInstance(hcModalEl);
+                    hcModal.show();
+                }
             });
         });
+    }
+
+    // Add Product FAQ Modal handling
+    const faqModalEl = document.getElementById('addProductFaqModal');
+    if (faqModalEl) {
+        const faqProductIdInput = document.getElementById('faqModalProductId');
+        const faqProductNameSpan = document.getElementById('faqModalProductName');
+        const faqContainer = document.getElementById('faqModalItemsContainer');
+        const addMoreBtn = document.getElementById('btnAddMoreFaqModal');
+
+        document.querySelectorAll('.open-faq-modal').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const prodId = this.getAttribute('data-product-id');
+                const prodName = this.getAttribute('data-product-name');
+
+                if (faqProductIdInput) faqProductIdInput.value = prodId;
+                if (faqProductNameSpan) faqProductNameSpan.textContent = prodName;
+
+                // Reset container to initial state with 1 empty FAQ item
+                if (faqContainer) {
+                    faqContainer.innerHTML = `
+                        <div class="faq-modal-item card mb-3 border p-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary faq-item-number">FAQ #1</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-faq-btn d-none" onclick="removeModalFaqBlock(this)">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Question <span class="text-danger">*</span></label>
+                                <textarea name="faqs[0][question]" class="form-control form-control-sm" rows="2" placeholder="e.g. How to use this product?" required></textarea>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold text-dark">Answer / Response</label>
+                                <textarea name="faqs[0][answer]" class="form-control form-control-sm" rows="3" placeholder="Enter answer details..."></textarea>
+                            </div>
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted mb-0">Sort Order</label>
+                                    <input type="number" name="faqs[0][sort_order]" class="form-control form-control-sm" value="0" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const faqModal = bootstrap.Modal.getOrCreateInstance(faqModalEl);
+                    faqModal.show();
+                }
+            });
+        });
+
+        if (addMoreBtn) {
+            addMoreBtn.addEventListener('click', function () {
+                const currentItems = faqContainer.querySelectorAll('.faq-modal-item').length;
+                const nextIdx = currentItems;
+                const newNum = currentItems + 1;
+                const newItem = document.createElement('div');
+                newItem.className = 'faq-modal-item card mb-3 border p-3 bg-light';
+                newItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary faq-item-number">FAQ #${newNum}</span>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-faq-btn" onclick="removeModalFaqBlock(this)">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-dark">Question <span class="text-danger">*</span></label>
+                        <textarea name="faqs[${nextIdx}][question]" class="form-control form-control-sm" rows="2" placeholder="e.g. What are the key ingredients?" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold text-dark">Answer / Response</label>
+                        <textarea name="faqs[${nextIdx}][answer]" class="form-control form-control-sm" rows="3" placeholder="Enter answer details..."></textarea>
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted mb-0">Sort Order</label>
+                            <input type="number" name="faqs[${nextIdx}][sort_order]" class="form-control form-control-sm" value="${nextIdx}" min="0">
+                        </div>
+                    </div>
+                `;
+                faqContainer.appendChild(newItem);
+                updateModalFaqNumbers();
+            });
+        }
     }
 });
 </script>

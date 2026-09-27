@@ -790,7 +790,8 @@ $updatedCount++;
 
         $category = $nav['categories'];
         $subcategory = $nav['subcategories'];
-        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory', 'healthConditions', 'brandList'));
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForCategory($cat_id);
+        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory', 'healthConditions', 'brandList', 'pageFaqs'));
     }
 
     public function productSubListing(Request $request, $category, $subcategory): View
@@ -815,14 +816,13 @@ $updatedCount++;
             'description' => 'Browse our full range of flowers, cakes, and gifts.',
         ];
 
-
-
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
         $category = $nav['categories'];
         $subcategory = $nav['subcategories'];
-        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory', 'healthConditions', 'brandList'));
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForSubcategory($cat_id);
+        return view('products.product-listing', compact('products', 'meta', 'sort', 'category', 'subcategory', 'healthConditions', 'brandList', 'pageFaqs'));
     }
     public function productDetails(string $slug): View
     {
@@ -881,7 +881,47 @@ $updatedCount++;
                 ->exists();
         }
 
-        return view('products.product-details', compact('product', 'meta', 'category', 'subcategory', 'healthConditions', 'brandList', 'isWishlisted'));
+        $productQuestions = \App\Models\FaqQuestionAnswer::getQuestionsForProduct($product->id);
+        $productFaqs = \App\Models\FaqQuestionAnswer::getFaqsForProduct($product->id);
+
+        return view('products.product-details', compact('product', 'meta', 'category', 'subcategory', 'healthConditions', 'brandList', 'isWishlisted', 'productQuestions', 'productFaqs'));
+    }
+
+    /**
+     * Submit a visitor question for a product.
+     */
+    public function askQuestion(Request $request, $id): \Illuminate\Http\RedirectResponse
+    {
+        $product = Product::findOrFail($id);
+
+        $validated = $request->validate([
+            'question' => 'required|string|max:2000',
+            'user_name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        $userId = \Illuminate\Support\Facades\Auth::id();
+        $userName = $validated['user_name'] ?? null;
+        $email = $validated['email'] ?? null;
+
+        if ($userId && \Illuminate\Support\Facades\Auth::user()) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $userName = $userName ?: ($user->firstname . ' ' . $user->lastname);
+            $email = $email ?: $user->email;
+        }
+
+        \App\Models\FaqQuestionAnswer::create([
+            'type' => 'question',
+            'product_id' => $product->id,
+            'user_id' => $userId,
+            'user_name' => $userName ?: 'Guest Visitor',
+            'email' => $email,
+            'question' => $validated['question'],
+            'answer' => null,
+            'is_active' => false,
+        ]);
+
+        return redirect()->back()->with('success', 'Thank you! Your question has been submitted. Our team will answer it shortly.');
     }
 
 
@@ -957,15 +997,16 @@ $updatedCount++;
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForBrand($brandId);
         return view('products.product-listing', [
             'products' => $products,
             'meta' => $meta,
             'sort' => $sort,
             'category' => $nav['categories'],
             'subcategory' => $nav['subcategories'],
-            //    'healthConcern' => $healthConcern,
             'healthConditions' => $healthConditions,
             'brandList' => $brandList,
+            'pageFaqs' => $pageFaqs,
         ]);
     }
 

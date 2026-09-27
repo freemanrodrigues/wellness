@@ -25,14 +25,16 @@
             <li class="breadcrumb-item"><a href="{{ route('home') }}" class="text-decoration-none">Home</a></li>
             @if(!empty($product->category))
                 <li class="breadcrumb-item">
-                    <a href="{{ route('product-listing.category', $product->category->slug ?? $product->category->name) }}" class="text-decoration-none">
+                    <a href="{{ route('product-listing.category', $product->category->slug ?? $product->category->name) }}"
+                        class="text-decoration-none">
                         {{ $product->category->name }}
                     </a>
                 </li>
             @endif
             @if(!empty($product->subcategory))
                 <li class="breadcrumb-item">
-                    <a href="{{ route('product-listing.subcategory', ['category' => $product->category->slug ?? $product->category->name ?? 'all', 'subcategory' => $product->subcategory->slug ?? $product->subcategory->name]) }}" class="text-decoration-none">
+                    <a href="{{ route('product-listing.subcategory', ['category' => $product->category->slug ?? $product->category->name ?? 'all', 'subcategory' => $product->subcategory->slug ?? $product->subcategory->name]) }}"
+                        class="text-decoration-none">
                         {{ $product->subcategory->name }}
                     </a>
                 </li>
@@ -165,13 +167,15 @@
 
                     @if (!empty($product->brand))
                         <p class="mb-2 text-muted">
-                            <span class="fw-semibold text-dark">Brand:</span> {{ is_object($product->brand) ? $product->brand->name : $product->brand }}
+                            <span class="fw-semibold text-dark">Brand:</span>
+                            {{ is_object($product->brand) ? $product->brand->name : $product->brand }}
                         </p>
                     @endif
 
                     @if (!empty($product->for_whom) && config("constants.for_whom.{$product->for_whom}"))
                         <p class="mb-2 text-muted">
-                            <span class="fw-semibold text-dark">For Whom:</span> {{ config("constants.for_whom.{$product->for_whom}") }}
+                            <span class="fw-semibold text-dark">For Whom:</span>
+                            {{ config("constants.for_whom.{$product->for_whom}") }}
                         </p>
                     @endif
                 </div>
@@ -191,11 +195,13 @@
                         <i class="bi bi-cart-plus me-1"></i> Add to Cart
                     </button>
 
-                    <a href="{{ route('cart.index') }}" class="btn btn-primary px-4 py-2 d-none" id="viewCartBtn" style="min-width: 140px;">
+                    <a href="{{ route('cart.index') }}" class="btn btn-primary px-4 py-2 d-none" id="viewCartBtn"
+                        style="min-width: 140px;">
                         <i class="bi bi-cart-check me-1"></i> View Cart
                     </a>
 
-                    <a href="{{ route('home') }}" class="btn btn-outline-success px-4 py-2 d-none" id="shopMoreBtn" style="min-width: 140px;">
+                    <a href="{{ route('home') }}" class="btn btn-outline-success px-4 py-2 d-none" id="shopMoreBtn"
+                        style="min-width: 140px;">
                         <i class="bi bi-bag-plus me-1"></i> Shop More
                     </a>
 
@@ -212,7 +218,7 @@
                 <div id="cartMessageContainer" class="mb-3"></div>
 
                 <p class="small text-muted mb-0">
-                    <i class="bi bi-truck me-1"></i> Same-day delivery available.
+
                     @if (!empty($product->variants))
                         SKU: <span id="currentSku">{{ $product->variants[0]['sku'] }}</span>
                     @elseif (!empty($product->sku))
@@ -220,33 +226,44 @@
                     @endif
                 </p>
 
+                <div class="mt-2 text-muted small">
+                    <i class="bi bi-clock-history me-1 text-primary"></i> <strong>Estimated Delivery:</strong> 8–12 working
+                    days. Customs clearance may occasionally cause a delay of up to 2 additional days.
+                </div>
+
                 <!-- Trust Badges Infographic -->
                 <div class="trust-badge-card mt-3 p-3 rounded-3 border shadow-sm">
                     <div class="row g-2 text-center align-items-center">
                         <div class="col-4">
                             <div class="d-flex flex-column align-items-center">
-                                <div class="trust-badge-icon-wrap mb-2 text-primary bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
+                                <div
+                                    class="trust-badge-icon-wrap mb-2 text-primary bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
                                     <i class="bi bi-clock-history fs-5"></i>
                                 </div>
-                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">Assured / On-Time</span>
+                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">Assured /
+                                    On-Time</span>
                                 <span class="text-muted" style="font-size: 0.7rem;">Delivery</span>
                             </div>
                         </div>
                         <div class="col-4 border-start border-end">
                             <div class="d-flex flex-column align-items-center">
-                                <div class="trust-badge-icon-wrap mb-2 text-primary bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
+                                <div
+                                    class="trust-badge-icon-wrap mb-2 text-primary bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
                                     <i class="bi bi-paypal fs-5" style="color: #003087;"></i>
                                 </div>
-                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">Guarantee by</span>
+                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">Guarantee
+                                    by</span>
                                 <span class="text-muted" style="font-size: 0.7rem;">PayPal</span>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-flex flex-column align-items-center">
-                                <div class="trust-badge-icon-wrap mb-2 text-success bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
+                                <div
+                                    class="trust-badge-icon-wrap mb-2 text-success bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center">
                                     <i class="bi bi-shield-lock-fill fs-5"></i>
                                 </div>
-                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">100% Secure</span>
+                                <span class="fw-semibold text-dark" style="font-size: 0.78rem; line-height: 1.2;">100%
+                                    Secure</span>
                                 <span class="text-muted" style="font-size: 0.7rem;">Transactions</span>
                             </div>
                         </div>
@@ -326,6 +343,157 @@
 
         </div>
     </div>
+
+    {{-- SECTION 1: Customer Questions & Answers (Q&A) --}}
+    <div class="mt-5 p-4 bg-white rounded-3 border shadow-sm" id="productQnaSection">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 pb-3 border-bottom">
+            <div>
+                <h4 class="h5 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-chat-left-text-fill text-primary"></i> Questions &amp; Answers
+                    <span
+                        class="badge bg-primary-subtle text-primary rounded-pill fs-6">{{ count($productQuestions ?? []) }}</span>
+                </h4>
+                <p class="text-muted small mb-0">Have a question about {{ $product->name }}? Get answers from our team.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill" data-bs-toggle="modal"
+                data-bs-target="#askQuestionModal">
+                <i class="bi bi-patch-question me-1"></i> Ask a Question
+            </button>
+        </div>
+
+        {{-- Answered Questions List --}}
+        @if(!empty($productQuestions) && count($productQuestions) > 0)
+            <div class="d-flex flex-column gap-3 mb-3">
+                @foreach($productQuestions as $qna)
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="d-flex align-items-start gap-2 mb-2">
+                            <span class="badge bg-primary rounded-circle px-2 py-1 me-1">Q</span>
+                            <div class="w-100">
+                                <h6 class="fw-semibold text-dark mb-1">{{ $qna->question }}</h6>
+                                <span class="text-muted small">Asked by
+                                    <strong>{{ $qna->user_name ?: ($qna->user ? $qna->user->firstname : 'Verified Buyer') }}</strong>
+                                    &bull; {{ $qna->created_at->format('M d, Y') }}</span>
+                            </div>
+                        </div>
+
+                        @if(!empty($qna->answer))
+                            <div class="ms-4 p-3 bg-white rounded-3 border-start border-3 border-primary shadow-sm mt-2">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span
+                                        class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small">
+                                        <i class="bi bi-patch-check-fill me-1"></i> Wellness Team Response
+                                    </span>
+                                </div>
+                                <p class="text-secondary mb-0 small" style="white-space: pre-line;">{{ $qna->answer }}</p>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="text-center py-4 px-3 bg-light rounded-3 border border-dashed mb-3">
+                <i class="bi bi-chat-square-dots text-muted display-6 d-block mb-2"></i>
+                <h6 class="fw-semibold text-dark mb-1">No questions asked yet</h6>
+                <p class="text-muted small mb-3">Be the first to ask a question about this product.</p>
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal"
+                    data-bs-target="#askQuestionModal">
+                    <i class="bi bi-plus-circle me-1"></i> Ask the First Question
+                </button>
+            </div>
+        @endif
+    </div>
+
+    {{-- Modal for Asking Question --}}
+    <div class="modal fade" id="askQuestionModal" tabindex="-1" aria-labelledby="askQuestionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <form method="POST" action="{{ route('product.ask-question', $product->id) }}">
+                    @csrf
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title fs-6 fw-bold" id="askQuestionModalLabel">
+                            <i class="bi bi-patch-question-fill text-primary me-1"></i> Ask a Question About This Product
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-muted">Product</label>
+                            <input type="text" class="form-control form-control-sm bg-light" value="{{ $product->name }}"
+                                readonly>
+                        </div>
+
+                        @guest
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label for="visitorName" class="form-label fw-semibold small">Your Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" name="user_name" id="visitorName" class="form-control form-control-sm"
+                                        placeholder="e.g. Rahul Sharma" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="visitorEmail" class="form-label fw-semibold small">Your Email <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" name="email" id="visitorEmail" class="form-control form-control-sm"
+                                        placeholder="e.g. rahul@example.com" required>
+                                </div>
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <span class="text-muted small">Asking as: <strong>{{ auth()->user()->firstname }}
+                                        {{ auth()->user()->lastname }}</strong> ({{ auth()->user()->email }})</span>
+                            </div>
+                        @endguest
+
+                        <div class="mb-3">
+                            <label for="questionText" class="form-label fw-semibold small">Your Question <span
+                                    class="text-danger">*</span></label>
+                            <textarea name="question" id="questionText" rows="4" class="form-control"
+                                placeholder="What would you like to know about ingredients, usage, or benefits?"
+                                required></textarea>
+                            <div class="form-text">Your question will be reviewed and answered by our health specialists.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill">Submit Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- SECTION 2: Frequently Asked Questions (FAQ) --}}
+    @if(!empty($productFaqs) && count($productFaqs) > 0)
+        <div class="mt-4 p-4 bg-white rounded-3 border shadow-sm" id="productFaqSection">
+            <div class="mb-4 pb-2 border-bottom">
+                <h4 class="h5 fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-question-circle-fill text-success"></i> Frequently Asked Questions (FAQ)
+                </h4>
+                <p class="text-muted small mb-0">Common queries and answers regarding {{ $product->name }}.</p>
+            </div>
+
+            <div class="accordion accordion-flush" id="productFaqAccordion">
+                @foreach($productFaqs as $index => $faq)
+                    <div class="accordion-item border rounded-3 mb-2 overflow-hidden">
+                        <h2 class="accordion-header" id="faqHeading{{ $faq->id }}">
+                            <button class="accordion-button {{ $index !== 0 ? 'collapsed' : '' }} fw-semibold text-dark bg-light"
+                                type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ $faq->id }}"
+                                aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="faqCollapse{{ $faq->id }}">
+                                <i class="bi bi-question-lg text-success me-2"></i> {{ $faq->question }}
+                            </button>
+                        </h2>
+                        <div id="faqCollapse{{ $faq->id }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
+                            aria-labelledby="faqHeading{{ $faq->id }}" data-bs-parent="#productFaqAccordion">
+                            <div class="accordion-body text-secondary small" style="white-space: pre-line;">
+                                {{ $faq->answer }}
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
 @endsection
 

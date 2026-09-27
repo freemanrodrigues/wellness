@@ -5,6 +5,7 @@ use App\Http\Controllers\Dashboard\ProductController;
 use App\Http\Controllers\Dashboard\CategoryController;
 use App\Http\Controllers\Dashboard\BrandController;
 use App\Http\Controllers\Dashboard\HealthConcernController;
+use App\Http\Controllers\Dashboard\FaqQuestionAnswerController;
 use App\Http\Controllers\Dashboard\BlogController as DashboardBlogController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Dashboard\{ScraperController, VendorProductManagementController, ProductFormController};
@@ -53,6 +54,7 @@ Route::get('/blog/{url}', [BlogController::class, 'show'])->name('blog.show');
 
 
 Route::get('/product/product-details/{id}', [ProductController::class, 'productDetails'])->name('product-details');
+Route::post('/product/{id}/ask-question', [ProductController::class, 'askQuestion'])->name('product.ask-question');
 Route::post('/cart/add', [BasketController::class, 'store'])->name('cart.add');
 Route::get('/cart', [BasketController::class, 'index'])->name('cart.index');
 Route::patch('/cart/{id}', [BasketController::class, 'updateQty'])->name('cart.update');
@@ -112,6 +114,10 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
         Route::resource('blog', DashboardBlogController::class);
         Route::post('blog/{id}/restore', [DashboardBlogController::class, 'restore'])->name('blog.restore');
+
+        Route::resource('faq-qna', FaqQuestionAnswerController::class);
+        Route::post('faq-qna/{id}/restore', [FaqQuestionAnswerController::class, 'restore'])->name('faq-qna.restore');
+        Route::post('faq-qna/{id}/reply', [FaqQuestionAnswerController::class, 'reply'])->name('faq-qna.reply');
 
         Route::resource('product-form', ProductFormController::class);
         Route::post('product-form/{id}/restore', [ProductFormController::class, 'restore'])->name('product-form.restore');

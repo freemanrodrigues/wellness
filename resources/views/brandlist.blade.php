@@ -189,7 +189,30 @@
                     <p class="text-muted mb-0">No brands available at the moment.</p>
                 </div>
             @endif
-        </div>
+        {{-- Page FAQs --}}
+        @if(!empty($pageFaqs) && count($pageFaqs) > 0)
+            <div class="mt-5 p-4 bg-white rounded-3 border shadow-sm">
+                <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-question-circle-fill text-success"></i> Frequently Asked Questions
+                </h4>
+                <div class="accordion accordion-flush" id="brandPageFaqAccordion">
+                    @foreach($pageFaqs as $index => $faq)
+                        <div class="accordion-item border rounded-3 mb-2 overflow-hidden">
+                            <h2 class="accordion-header" id="bFaqHeading{{ $faq->id }}">
+                                <button class="accordion-button {{ $index !== 0 ? 'collapsed' : '' }} fw-semibold text-dark bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#bFaqCollapse{{ $faq->id }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="bFaqCollapse{{ $faq->id }}">
+                                    <i class="bi bi-question-lg text-success me-2"></i> {{ $faq->question }}
+                                </button>
+                            </h2>
+                            <div id="bFaqCollapse{{ $faq->id }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="bFaqHeading{{ $faq->id }}" data-bs-parent="#brandPageFaqAccordion">
+                                <div class="accordion-body text-secondary small" style="white-space: pre-line;">
+                                    {{ $faq->answer }}
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
     </div>
 

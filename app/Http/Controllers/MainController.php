@@ -111,6 +111,7 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('home');
 
         return view('home', [
             'meta' => $meta,
@@ -118,7 +119,8 @@ class MainController extends Controller
             'category' => $nav['categories'],
             'subcategory' => $nav['subcategories'],
             'healthConditions' => $healthConditions,
-            'brandList' => $brandList
+            'brandList' => $brandList,
+            'pageFaqs' => $pageFaqs,
         ]);
     }
 
@@ -134,7 +136,8 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
-        return view('about', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('about');
+        return view('about', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList, 'pageFaqs' => $pageFaqs]);
     }
 
     /**
@@ -149,7 +152,8 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
-        return view('privacy', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('privacy');
+        return view('privacy', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList, 'pageFaqs' => $pageFaqs]);
     }
 
     /**
@@ -164,7 +168,8 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
-        return view('terms', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('terms');
+        return view('terms', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList, 'pageFaqs' => $pageFaqs]);
     }
 
     public function contact(): View
@@ -176,7 +181,8 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
-        return view('contact', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList]);
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('contact');
+        return view('contact', ['meta' => $meta, 'category' => $nav['categories'], 'subcategory' => $nav['subcategories'], 'healthConditions' => $healthConditions, 'brandList' => $brandList, 'pageFaqs' => $pageFaqs]);
     }
 
     public function test(): View
@@ -209,6 +215,7 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('brandlist');
 
         return view('brandlist', [
             'meta' => $meta,
@@ -217,6 +224,7 @@ class MainController extends Controller
             'subcategory' => $nav['subcategories'],
             'healthConditions' => $healthConditions,
             'brandList' => $brandList,
+            'pageFaqs' => $pageFaqs,
         ]);
     }
 
@@ -238,6 +246,7 @@ class MainController extends Controller
         $nav = Category::getTopCategoriesWithSubcategories();
         $healthConditions = HealthConcern::getAllActiveHealthConcerns();
         $brandList = Brand::getAllActiveBrands();
+        $pageFaqs = \App\Models\FaqQuestionAnswer::getFaqsForPage('shop-by-health-concerns');
 
         return view('shop-by-health-concerns', [
             'meta' => $meta,
@@ -246,6 +255,7 @@ class MainController extends Controller
             'subcategory' => $nav['subcategories'],
             'healthConditions' => $healthConditions,
             'brandList' => $brandList,
+            'pageFaqs' => $pageFaqs,
         ]);
     }
 }
