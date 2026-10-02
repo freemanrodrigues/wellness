@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 class ProductController extends Controller
 {
@@ -151,7 +152,8 @@ class ProductController extends Controller
      */
     public function importForm(): View
     {
-        $mandatoryColumns = [
+        $mandatoryUpdateColumns = ['id'];
+        $mandatoryInsertColumns = [
             'name',
             'vendor_product_name',
             'description',
@@ -200,7 +202,7 @@ class ProductController extends Controller
             'barcode'
         ];
 
-        return view('dashboard.products.import', compact('mandatoryColumns', 'allColumns'));
+        return view('dashboard.products.import', compact('mandatoryUpdateColumns', 'mandatoryInsertColumns', 'allColumns'));
     }
 
     /**
@@ -208,31 +210,42 @@ class ProductController extends Controller
      */
     public function importProcess(Request $request): RedirectResponse
     {
-
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
+            'csv_file' => 'required|file|max:10240',
         ]);
 
         $file = $request->file('csv_file');
+        $ext = strtolower($file->getClientOriginalExtension());
+        if (!in_array($ext, ['csv', 'txt'], true)) {
+            return redirect()->route('dashboard.products.import')
+                ->with('error', 'The uploaded file must be a valid .csv file.');
+        }
+
         $handle = fopen($file->getRealPath(), 'r');
 
         if (!$handle) {
-            dd("148");
-            return back()->with('error', 'Unable to open uploaded CSV file.');
+            return redirect()->route('dashboard.products.import')->with('error', 'Unable to open uploaded CSV file.');
         }
 
         // Read header row
         $rawHeader = fgetcsv($handle, 4096, ',');
         if (!$rawHeader) {
             fclose($handle);
-            dd("156");
-            return back()->with('error', 'CSV file is empty or formatted incorrectly.');
+            return redirect()->route('dashboard.products.import')->with('error', 'CSV file is empty or formatted incorrectly.');
         }
 
-        // Trim header column names
-        $header = array_map('trim', $rawHeader);
+        // Strip UTF-8 BOM if present and normalize header column names to lowercase
+        $header = array_map(function ($col) {
+            $col = preg_replace('/^\xEF\xBB\xBF/', '', $col);
+            $col = preg_replace('/^\x{FEFF}/u', '', $col);
+            return strtolower(trim($col));
+        }, $rawHeader);
 
-        $mandatoryColumns = [
+        // Mandatory column for update is 'id'
+        $mandatoryUpdateColumns = ['id'];
+
+        // Mandatory columns for insert
+        $mandatoryInsertColumns = [
             'name',
             'vendor_product_name',
             'description',
@@ -249,116 +262,241 @@ class ProductController extends Controller
             'vendor_code'
         ];
 
-        $missingColumns = array_diff($mandatoryColumns, $header);
-        if (!empty($missingColumns)) {
+        // 'id' column header is mandatory in CSV
+        if (!in_array('id', $header, true)) {
             fclose($handle);
-            dd("184");
-            return back()->with('error', 'CSV file is missing mandatory columns: ' . implode(', ', $missingColumns));
+            return redirect()->route('dashboard.products.import')
+                ->with('error', "CSV file header must contain the mandatory 'id' column.");
         }
 
         $insertedCount = 0;
         $updatedCount = 0;
         $errors = [];
+        $rowLogs = [];
         $rowNum = 1;
+
+        // Check if CSV file contains mandatory insert columns in header
+        $hasInsertHeaders = true;
+        foreach ($mandatoryInsertColumns as $reqCol) {
+            if (!in_array($reqCol, $header, true)) {
+                $hasInsertHeaders = false;
+                break;
+            }
+        }
 
         while (($rowValues = fgetcsv($handle, 4096, ',')) !== false) {
             $rowNum++;
 
-            // Skip completely empty lines
-            if (array_filter($rowValues) === []) {
-                echo "<br> RRRRRRRRRRRRRRRRRR XZXXZRRRR";
+            // Skip completely empty lines (all columns empty strings)
+            $trimmedValues = array_map('trim', $rowValues);
+            if (implode('', $trimmedValues) === '') {
                 continue;
             }
 
             if (count($header) !== count($rowValues)) {
-                $errors[] = "Row {$rowNum}: Column count does not match header.";
-                echo "<br>  QQQQQ1";
+                $errStr = "Row {$rowNum}: Column count (" . count($rowValues) . ") does not match header count (" . count($header) . ").";
+                $errors[] = $errStr;
+                $rowLogs[] = ['status' => 'error', 'message' => $errStr];
                 continue;
             }
 
-            $row = array_combine($header, array_map('trim', $rowValues));
+            $row = array_combine($header, $trimmedValues);
 
-            // Check mandatory fields
-            $rowMissing = [];
-            foreach ($mandatoryColumns as $col) {
-                if (!isset($row[$col]) || $row[$col] === '') {
-                    $rowMissing[] = $col;
+            $hasIdValue = isset($row['id']) && $row['id'] !== '';
+            $isNumericId = $hasIdValue && is_numeric($row['id']);
+            $productId = $isNumericId ? (int) $row['id'] : null;
+
+            if ($hasIdValue) {
+                // ================= UPDATE OPERATION =================
+                // Only 'id' and at least one other non-empty column to be updated are required.
+                if (!$isNumericId || $productId <= 0) {
+                    $errStr = "Row {$rowNum}: Invalid 'id' value '{$row['id']}'. Must be a valid numeric ID.";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                    continue;
                 }
-            }
 
-            if (!empty($rowMissing)) {
-                $errors[] = "Row {$rowNum}: Missing required values for (" . implode(', ', $rowMissing) . ").";
-                echo "<br>  RRRRRRRRRRRRRRRRRR RRRR";
-                continue;
-            }
+                $existingProduct = Product::where('id', $productId)->first();
+                if (!$existingProduct) {
+                    $errStr = "Row {$rowNum} (ID {$productId}): Product with ID {$productId} does not exist in database for update.";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                    continue;
+                }
 
-            // Parse booleans and numeric values
-            $isActiveVal = strtolower($row['isactive']);
-            $isactive = in_array($isActiveVal, ['1', 'true', 'active', 'yes'], true) ? 1 : 0;
+                $updateData = [];
+                $invalidCols = [];
 
-            $productData = [
-                'name' => $row['name'],
-                'short_name' => $row['short_name'] ?? null,
-                'vendor_product_name' => $row['vendor_product_name'],
-                'short_description' => $row['short_description'] ?? null,
-                'description' => $row['description'],
-                'info' => $row['info'] ?? null,
-                'use_case' => $row['use_case'] ?? null,
-                'price' => is_numeric($row['price']) ? (float) $row['price'] : 0,
-                'discount' => isset($row['discount']) && is_numeric($row['discount']) ? (float) $row['discount'] : 0,
-                'deliverycharge' => is_numeric($row['deliverycharge']) ? (float) $row['deliverycharge'] : 0,
-                'vendorprice' => isset($row['vendorprice']) && is_numeric($row['vendorprice']) ? (float) $row['vendorprice'] : 0,
-                'vendordeliveryprice' => isset($row['vendordeliveryprice']) && is_numeric($row['vendordeliveryprice']) ? (float) $row['vendordeliveryprice'] : 0,
-                'more_price' => isset($row['more_price']) && in_array(strtolower($row['more_price']), ['1', 'true', 'yes'], true) ? 1 : 0,
-                'isactive' => $isactive,
-                'imgurl' => $row['imgurl'],
-                'more_img' => isset($row['more_img']) && in_array(strtolower($row['more_img']), ['1', 'true', 'yes'], true) ? 1 : 0,
-                'metatitle' => $row['metatitle'],
-                'metadesc' => $row['metadesc'],
-                'metakeyword' => $row['metakeyword'] ?? null,
-                'metaurl' => $row['metaurl'],
-                'cid' => isset($row['cid']) && is_numeric($row['cid']) ? (int) $row['cid'] : null,
-                'vid' => (int) $row['vid'],
-                'cat_id' => (int) $row['cat_id'],
-                'subcat_id' => (int) $row['subcat_id'],
-                'brand_id' => isset($row['brand_id']) && is_numeric($row['brand_id']) ? (int) $row['brand_id'] : null,
-                'vendor_code' => $row['vendor_code'],
-                'sku' => !empty($row['sku']) ? $row['sku'] : null,
-                'barcode' => $row['barcode'] ?? null,
-            ];
-
-            try {
-                if (!empty($row['id']) && is_numeric($row['id']) && Product::where('id', $row['id'])->exists()) {
-                    Product::where('id', $row['id'])->update($productData);
-                    $updatedCount++;
-                } /* elseif (!empty($row['sku']) && Product::where('sku', $row['sku'])->exists()) {
-Product::where('sku', $row['sku'])->update($productData);
-$updatedCount++;
-} */ else {
-                    if (!empty($row['id']) && is_numeric($row['id'])) {
-                        $productData['id'] = (int) $row['id'];
+                foreach ($row as $colName => $colValue) {
+                    if ($colName === 'id') {
+                        continue;
                     }
-                    Product::create($productData);
-                    $insertedCount++;
+
+                    if (Schema::hasColumn('products', $colName)) {
+                        if ($colValue !== '') {
+                            $updateData[$colName] = $this->parseCsvColumnValue($colName, $colValue);
+                        }
+                    } else {
+                        $invalidCols[] = $colName;
+                    }
                 }
-            } catch (\Exception $e) {
-                $errors[] = "Row {$rowNum}: Database error (" . $e->getMessage() . ").";
+
+                if (!empty($invalidCols)) {
+                    $errStr = "Row {$rowNum} (ID {$productId}): Column(s) [" . implode(', ', $invalidCols) . "] do not exist in products table.";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                }
+
+                if (empty($updateData)) {
+                    $errStr = "Row {$rowNum} (ID {$productId}): At least one column other than 'id' must have a value to perform an update.";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                    continue;
+                }
+
+                try {
+                    Product::where('id', $productId)->update($updateData);
+                    $updatedCount++;
+                    $succStr = "Row {$rowNum} (ID {$productId}): Product updated successfully. Updated columns: [" . implode(', ', array_keys($updateData)) . "].";
+                    $rowLogs[] = ['status' => 'success', 'message' => $succStr];
+                } catch (\Exception $e) {
+                    $errStr = "Row {$rowNum} (ID {$productId}): Database update error (" . $e->getMessage() . ").";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                }
+
+            } else {
+                // ================= INSERT OPERATION =================
+                // Happens when 'id' column is empty/blank in the CSV row
+                if (!$hasInsertHeaders) {
+                    $errStr = "Row {$rowNum}: 'id' value is missing for update operation, and CSV does not contain required headers for new product insertion.";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                    continue;
+                }
+
+                $rowMissing = [];
+                foreach ($mandatoryInsertColumns as $col) {
+                    if (!isset($row[$col]) || $row[$col] === '') {
+                        $rowMissing[] = $col;
+                    }
+                }
+
+                if (!empty($rowMissing)) {
+                    $errStr = "Row {$rowNum}: Cannot insert new product. Missing required values for (" . implode(', ', $rowMissing) . ").";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                    continue;
+                }
+
+                $isActiveVal = strtolower($row['isactive'] ?? '');
+                $isactive = in_array($isActiveVal, ['1', 'true', 'active', 'yes'], true) ? 1 : 0;
+
+                $productData = [
+                    'name' => $row['name'],
+                    'short_name' => $row['short_name'] ?? null,
+                    'vendor_product_name' => $row['vendor_product_name'],
+                    'short_description' => $row['short_description'] ?? null,
+                    'description' => $row['description'],
+                    'info' => $row['info'] ?? null,
+                    'use_case' => $row['use_case'] ?? null,
+                    'price' => is_numeric($row['price']) ? (float) $row['price'] : 0,
+                    'discount' => isset($row['discount']) && is_numeric($row['discount']) ? (float) $row['discount'] : 0,
+                    'deliverycharge' => is_numeric($row['deliverycharge']) ? (float) $row['deliverycharge'] : 0,
+                    'vendorprice' => isset($row['vendorprice']) && is_numeric($row['vendorprice']) ? (float) $row['vendorprice'] : 0,
+                    'vendordeliveryprice' => isset($row['vendordeliveryprice']) && is_numeric($row['vendordeliveryprice']) ? (float) $row['vendordeliveryprice'] : 0,
+                    'more_price' => isset($row['more_price']) && in_array(strtolower($row['more_price']), ['1', 'true', 'yes'], true) ? 1 : 0,
+                    'isactive' => $isactive,
+                    'imgurl' => $row['imgurl'],
+                    'more_img' => isset($row['more_img']) && in_array(strtolower($row['more_img']), ['1', 'true', 'yes'], true) ? 1 : 0,
+                    'metatitle' => $row['metatitle'],
+                    'metadesc' => $row['metadesc'],
+                    'metakeyword' => $row['metakeyword'] ?? null,
+                    'metaurl' => $row['metaurl'],
+                    'cid' => isset($row['cid']) && is_numeric($row['cid']) ? (int) $row['cid'] : null,
+                    'vid' => (int) $row['vid'],
+                    'cat_id' => (int) $row['cat_id'],
+                    'subcat_id' => (int) $row['subcat_id'],
+                    'brand_id' => isset($row['brand_id']) && is_numeric($row['brand_id']) ? (int) $row['brand_id'] : null,
+                    'vendor_code' => $row['vendor_code'],
+                    'sku' => !empty($row['sku']) ? $row['sku'] : null,
+                    'barcode' => $row['barcode'] ?? null,
+                ];
+
+                try {
+                    $newProd = Product::create($productData);
+                    $insertedCount++;
+                    $succStr = "Row {$rowNum} (ID {$newProd->id}): New product inserted successfully.";
+                    $rowLogs[] = ['status' => 'success', 'message' => $succStr];
+                } catch (\Exception $e) {
+                    $errStr = "Row {$rowNum}: Database insert error (" . $e->getMessage() . ").";
+                    $errors[] = $errStr;
+                    $rowLogs[] = ['status' => 'error', 'message' => $errStr];
+                }
             }
         }
 
         fclose($handle);
 
+        if ($insertedCount === 0 && $updatedCount === 0) {
+            $errMsg = "Import finished! No products were updated or inserted.";
+            if (!empty($errors)) {
+                $errMsg .= " " . count($errors) . " row error(s) occurred.";
+            } else {
+                $errors[] = "No matching product records or updateable columns were found in the uploaded file.";
+            }
+            return redirect()->route('dashboard.products.import')
+                ->with('error', $errMsg)
+                ->with('import_errors', $errors)
+                ->with('import_logs', $rowLogs);
+        }
+
         $msg = "Import finished! {$insertedCount} product(s) inserted, {$updatedCount} product(s) updated.";
         if (!empty($errors)) {
             $msg .= " " . count($errors) . " row error(s) occurred.";
-            print_r($errors);
-            dd("QQQQQ   $msg  ");
             return redirect()->route('dashboard.products.import')
-                ->with('success', $msg)
-                ->with('import_errors', $errors);
+                ->with('error', $msg)
+                ->with('import_errors', $errors)
+                ->with('import_logs', $rowLogs);
         }
-        // dd("ZZZZ");
-        return redirect()->route('dashboard.products.index')->with('success', $msg);
+
+        return redirect()->route('dashboard.products.import')
+            ->with('success', $msg)
+            ->with('import_logs', $rowLogs);
+    }
+
+    /**
+     * Helper to parse CSV column values for update operations.
+     */
+    private function parseCsvColumnValue(string $key, string $value)
+    {
+        switch ($key) {
+            case 'price':
+            case 'discount':
+            case 'deliverycharge':
+            case 'vendorprice':
+            case 'vendordeliveryprice':
+                return is_numeric($value) ? (float) $value : 0.0;
+
+            case 'more_price':
+            case 'more_img':
+                return in_array(strtolower($value), ['1', 'true', 'yes'], true) ? 1 : 0;
+
+            case 'isactive':
+                return in_array(strtolower($value), ['1', 'true', 'active', 'yes'], true) ? 1 : 0;
+
+            case 'cid':
+            case 'brand_id':
+                return is_numeric($value) ? (int) $value : null;
+
+            case 'vid':
+            case 'cat_id':
+            case 'subcat_id':
+                return is_numeric($value) ? (int) $value : 0;
+
+            default:
+                return $value;
+        }
     }
 
     /**

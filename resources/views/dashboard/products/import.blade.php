@@ -3,38 +3,73 @@
 
 <div class="dash-wrapper">
 
-    <main class="dash-main mt-4">
+    <main class="dash-main mt-5 pt-3">
 
         {{-- Flash Messages --}}
-        @if (session('success'))
-            <div class="dash-alert dash-alert--success" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="dash-alert dash-alert--danger" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if (session('import_errors'))
-            <div class="card border-danger mb-4 shadow-sm">
-                <div class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-exclamation-octagon me-2"></i>Import Error Details</span>
-                    <span class="badge bg-white text-danger">{{ count(session('import_errors')) }} Errors</span>
+        <div class="mt-2 mb-4">
+            @if (session('success'))
+                <div class="dash-alert dash-alert--success mb-3" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {{ session('success') }}
                 </div>
-                <div class="card-body bg-light" style="max-height: 250px; overflow-y: auto;">
-                    <ul class="mb-0 text-danger small">
-                        @foreach (session('import_errors') as $err)
-                            <li>{{ $err }}</li>
-                        @endforeach
-                    </ul>
+            @endif
+
+            @if (session('error'))
+                <div class="dash-alert dash-alert--danger mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ session('error') }}
                 </div>
-            </div>
-        @endif
+            @endif
+
+            @if ($errors->any())
+                <div class="dash-alert dash-alert--danger mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @foreach ($errors->all() as $err)
+                        <div>{{ $err }}</div>
+                    @endforeach
+                </div>
+            @endif
+
+            @if (session('import_errors'))
+                <div class="card border-danger mb-4 shadow-sm">
+                    <div class="card-header bg-danger text-white fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-exclamation-octagon me-2"></i>Import Error Details</span>
+                        <span class="badge bg-white text-danger">{{ count(session('import_errors')) }} Errors</span>
+                    </div>
+                    <div class="card-body bg-light" style="max-height: 200px; overflow-y: auto;">
+                        <ul class="mb-0 text-danger small">
+                            @foreach (session('import_errors') as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('import_logs'))
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-list-check me-2 text-info"></i>Import Execution Log (Row-by-Row Details)</span>
+                        <span class="badge bg-secondary">{{ count(session('import_logs')) }} Rows Processed</span>
+                    </div>
+                    <div class="card-body bg-white p-3" style="max-height: 320px; overflow-y: auto;">
+                        <div class="list-group list-group-flush small font-monospace">
+                            @foreach (session('import_logs') as $log)
+                                <div class="list-group-item bg-transparent px-2 py-1 border-bottom-0 d-flex align-items-start">
+                                    @if ($log['status'] === 'success')
+                                        <i class="bi bi-check-circle-fill text-success me-2 mt-1 fs-6"></i>
+                                        <span class="text-success fw-medium">{{ $log['message'] }}</span>
+                                    @else
+                                        <i class="bi bi-x-circle-fill text-danger me-2 mt-1 fs-6"></i>
+                                        <span class="text-danger fw-medium">{{ $log['message'] }}</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
 
         {{-- Page Header --}}
         <div class="dash-page-header d-flex justify-content-between align-items-center mb-4">
@@ -97,13 +132,28 @@
                             <i class="bi bi-info-circle me-2 text-info"></i>CSV Column Specifications
                         </h3>
 
-                        {{-- Mandatory Columns --}}
+                        {{-- Mandatory Column for Update --}}
+                        <div class="mb-3">
+                            <h4 class="small fw-bold text-primary mb-2">
+                                <i class="bi bi-pencil-square me-1"></i>Mandatory for UPDATE Operation:
+                            </h4>
+                            <div class="d-flex flex-wrap gap-1 mb-1">
+                                @foreach ($mandatoryUpdateColumns as $col)
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 font-monospace">
+                                        {{ $col }}
+                                    </span>
+                                @endforeach
+                            </div>
+                            <span class="extra-small text-muted d-block mt-1">+ At least one column to be updated</span>
+                        </div>
+
+                        {{-- Mandatory Columns for Insert --}}
                         <div class="mb-4">
                             <h4 class="small fw-bold text-danger mb-2">
-                                <i class="bi bi-asterisk text-danger me-1"></i>Mandatory Columns (Required):
+                                <i class="bi bi-plus-circle text-danger me-1"></i>Mandatory for INSERT Operation:
                             </h4>
                             <div class="d-flex flex-wrap gap-1">
-                                @foreach ($mandatoryColumns as $col)
+                                @foreach ($mandatoryInsertColumns as $col)
                                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 font-monospace">
                                         {{ $col }}
                                     </span>
@@ -111,13 +161,13 @@
                             </div>
                         </div>
 
-                        {{-- Optional Columns --}}
+                        {{-- Other Support/Optional Columns --}}
                         <div>
                             <h4 class="small fw-bold text-secondary mb-2">
-                                <i class="bi bi-check2-circle me-1"></i>Optional Columns:
+                                <i class="bi bi-check2-circle me-1"></i>Other Supported Columns:
                             </h4>
                             <div class="d-flex flex-wrap gap-1">
-                                @foreach (array_diff($allColumns, $mandatoryColumns) as $col)
+                                @foreach (array_diff($allColumns, array_merge($mandatoryUpdateColumns, $mandatoryInsertColumns)) as $col)
                                     <span class="badge bg-light text-dark border px-2 py-1 font-monospace">
                                         {{ $col }}
                                     </span>
@@ -130,7 +180,8 @@
                         <div class="small text-muted">
                             <strong>Note:</strong>
                             <ul class="ps-3 mb-0 mt-1 extra-small">
-                                <li>If <code>id</code> or <code>sku</code> matches an existing product in your catalog, that product will be updated.</li>
+                                <li>If row has <code>id</code> value and matches an existing product in your database, it will perform an <strong>UPDATE</strong>.</li>
+                                <li>If row has blank <code>id</code>, it will perform a new product <strong>INSERT</strong> (requires all mandatory insert columns).</li>
                                 <li><code>isactive</code> can be set to <code>1</code> (Active) or <code>0</code> (Inactive).</li>
                                 <li>All price values should be numeric (e.g. <code>29.99</code>).</li>
                             </ul>

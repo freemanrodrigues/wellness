@@ -142,10 +142,16 @@
                     @foreach($healthConcernsList as $hc)
                         @php
                             $hcUrl = url('/health/' . $hc->slug);
-                            $imagePath = $hc->icon ?: ($hc->image ?: $hc->banner);
-                            $hasImage = !empty($imagePath);
-                            if ($hasImage && !str_starts_with($imagePath, 'http') && !str_starts_with($imagePath, '/')) {
-                                $imagePath = asset($imagePath);
+                            $rawImage = $hc->icon ?: ($hc->image ?: $hc->banner);
+                            $hasImage = !empty($rawImage);
+                            if ($hasImage) {
+                                if (str_starts_with($rawImage, 'http') || str_starts_with($rawImage, '/')) {
+                                    $imagePath = $rawImage;
+                                } else {
+                                    $imagePath = "/images/health-concerns/" . ltrim($rawImage, '/');
+                                }
+                            } else {
+                                $imagePath = '';
                             }
                         @endphp
                         <div class="col hc-item-col" data-hc-name="{{ strtolower($hc->name) }}">
@@ -155,14 +161,18 @@
                                         <img src="{{ $imagePath }}" alt="{{ $hc->name }}" class="hc-card__img" loading="lazy"
                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="hc-card__avatar" style="display: none;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
                                             </svg>
                                         </div>
                                     @else
                                         <div class="hc-card__avatar">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
-                                                <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
                                             </svg>
                                         </div>
                                     @endif
@@ -191,69 +201,76 @@
                 <div class="text-center py-5 border rounded-4 bg-light">
                     <p class="text-muted mb-0">No health concerns available at the moment.</p>
                 </div>
-        {{-- Page FAQs --}}
-        @if(!empty($pageFaqs) && count($pageFaqs) > 0)
-            <div class="mt-5 p-4 bg-white rounded-3 border shadow-sm">
-                <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-question-circle-fill text-success"></i> Frequently Asked Questions
-                </h4>
-                <div class="accordion accordion-flush" id="hcPageFaqAccordion">
-                    @foreach($pageFaqs as $index => $faq)
-                        <div class="accordion-item border rounded-3 mb-2 overflow-hidden">
-                            <h2 class="accordion-header" id="hcFaqHeading{{ $faq->id }}">
-                                <button class="accordion-button {{ $index !== 0 ? 'collapsed' : '' }} fw-semibold text-dark bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#hcFaqCollapse{{ $faq->id }}" aria-expanded="{{ $index === 0 ? 'true' : 'false' }}" aria-controls="hcFaqCollapse{{ $faq->id }}">
-                                    <i class="bi bi-question-lg text-success me-2"></i> {{ $faq->question }}
-                                </button>
-                            </h2>
-                            <div id="hcFaqCollapse{{ $faq->id }}" class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}" aria-labelledby="hcFaqHeading{{ $faq->id }}" data-bs-parent="#hcPageFaqAccordion">
-                                <div class="accordion-body text-secondary small" style="white-space: pre-line;">
-                                    {{ $faq->answer }}
+            @endif
+            {{-- Page FAQs --}}
+            @if(!empty($pageFaqs) && count($pageFaqs) > 0)
+                <div class="mt-5 p-4 bg-white rounded-3 border shadow-sm">
+                    <h4 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-question-circle-fill text-success"></i> Frequently Asked Questions
+                    </h4>
+                    <div class="accordion accordion-flush" id="hcPageFaqAccordion">
+                        @foreach($pageFaqs as $index => $faq)
+                            <div class="accordion-item border rounded-3 mb-2 overflow-hidden">
+                                <h2 class="accordion-header" id="hcFaqHeading{{ $faq->id }}">
+                                    <button
+                                        class="accordion-button {{ $index !== 0 ? 'collapsed' : '' }} fw-semibold text-dark bg-light"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#hcFaqCollapse{{ $faq->id }}"
+                                        aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
+                                        aria-controls="hcFaqCollapse{{ $faq->id }}">
+                                        <i class="bi bi-question-lg text-success me-2"></i> {{ $faq->question }}
+                                    </button>
+                                </h2>
+                                <div id="hcFaqCollapse{{ $faq->id }}"
+                                    class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
+                                    aria-labelledby="hcFaqHeading{{ $faq->id }}" data-bs-parent="#hcPageFaqAccordion">
+                                    <div class="accordion-body text-secondary small" style="white-space: pre-line;">
+                                        {{ $faq->answer }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
 
-    </div>
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('hcSearchInput');
-            const hcGrid = document.getElementById('hcGrid');
-            const noResults = document.getElementById('noHcResults');
-            const countBadge = document.getElementById('hcCountBadge');
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const searchInput = document.getElementById('hcSearchInput');
+                const hcGrid = document.getElementById('hcGrid');
+                const noResults = document.getElementById('noHcResults');
+                const countBadge = document.getElementById('hcCountBadge');
 
-            if (!searchInput || !hcGrid) return;
+                if (!searchInput || !hcGrid) return;
 
-            const hcCols = hcGrid.querySelectorAll('.hc-item-col');
-            const totalCount = hcCols.length;
+                const hcCols = hcGrid.querySelectorAll('.hc-item-col');
+                const totalCount = hcCols.length;
 
-            searchInput.addEventListener('input', function () {
-                const query = this.value.trim().toLowerCase();
-                let visibleCount = 0;
+                searchInput.addEventListener('input', function () {
+                    const query = this.value.trim().toLowerCase();
+                    let visibleCount = 0;
 
-                hcCols.forEach(col => {
-                    const name = col.getAttribute('data-hc-name') || '';
-                    if (name.includes(query)) {
-                        col.classList.remove('d-none');
-                        visibleCount++;
-                    } else {
-                        col.classList.add('d-none');
+                    hcCols.forEach(col => {
+                        const name = col.getAttribute('data-hc-name') || '';
+                        if (name.includes(query)) {
+                            col.classList.remove('d-none');
+                            visibleCount++;
+                        } else {
+                            col.classList.add('d-none');
+                        }
+                    });
+
+                    if (countBadge) {
+                        countBadge.textContent = visibleCount;
+                    }
+
+                    if (visibleCount === 0 && totalCount > 0) {
+                        noResults.classList.remove('d-none');
+                    } else if (noResults) {
+                        noResults.classList.add('d-none');
                     }
                 });
-
-                if (countBadge) {
-                    countBadge.textContent = visibleCount;
-                }
-
-                if (visibleCount === 0 && totalCount > 0) {
-                    noResults.classList.remove('d-none');
-                } else if (noResults) {
-                    noResults.classList.add('d-none');
-                }
             });
-        });
-    </script>
+        </script>
 @endsection
