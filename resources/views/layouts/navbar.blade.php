@@ -10,7 +10,7 @@ SITE HEADER WRAPPER (sticky, two rows)
 
                 {{-- Brand / Logo --}}
                 <a class="pf-brand" href="{{ url('/') }}" id="brandLogo">
-                    <img src="/images/logo.jpg" alt="{{ config('app.name') }}" style="height:38px;" class="me-2">
+                    <img src="/images/logo.png" alt="{{ config('app.name') }}" style="height:38px;" class="me-2">
                     <span>{{ config('app.name', 'Wellness') }}</span>
                 </a>
 
@@ -64,7 +64,8 @@ SITE HEADER WRAPPER (sticky, two rows)
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item pf-user-menu__item" href="{{ route('myaccount.home') }}" id="menuMyAccount">
+                                    <a class="dropdown-item pf-user-menu__item" href="{{ route('myaccount.home') }}"
+                                        id="menuMyAccount">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
                                             class="me-2" viewBox="0 0 16 16">
                                             <path
@@ -157,15 +158,16 @@ SITE HEADER WRAPPER (sticky, two rows)
                     @foreach ($category as $k => $cat)
                         <li class="pf-cat-item dropdown">
                             <a class="pf-cat-link dropdown-toggle"
-                                href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}" data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                                href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}"
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 {{ $cat->name}}
                             </a>
                             <div class="dropdown-menu pf-megamenu shadow-lg border-0 p-4">
                                 <div class="row g-4">
                                     {{-- Column 1: Subcategories (Max 12 items) --}}
                                     <div class="col-md-4">
-                                        <a href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}" class="text-decoration-none">
+                                        <a href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}"
+                                            class="text-decoration-none">
                                             <p class="pf-megamenu__heading">{{ $cat->name }}</p>
                                         </a>
                                         <ul class="list-unstyled mb-0">
@@ -186,7 +188,7 @@ SITE HEADER WRAPPER (sticky, two rows)
                                                 @if ($subCount > 12)
                                                     <li>
                                                         <a class="pf-megamenu__more-link"
-                                                           href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}">
+                                                            href="/category/{{ strtolower(str_replace(' ', '-', $cat->slug ?? $cat->name))}}">
                                                             + View All ({{ $subCount }})
                                                         </a>
                                                     </li>
@@ -267,7 +269,8 @@ SITE HEADER WRAPPER (sticky, two rows)
                                 @endforeach
                                 @if(count($healthConditions) > 12)
                                     <li>
-                                        <a class="pf-megamenu__more-link" href="{{ url('/shop-by-health-concerns') }}">+ View All ({{ count($healthConditions) }})</a>
+                                        <a class="pf-megamenu__more-link" href="{{ url('/shop-by-health-concerns') }}">+ View
+                                            All ({{ count($healthConditions) }})</a>
                                     </li>
                                 @endif
                             </ul>
@@ -276,8 +279,8 @@ SITE HEADER WRAPPER (sticky, two rows)
                 @endif
                 @if(isset($brandList) && !empty($brandList))
                     <li class="pf-cat-item dropdown">
-                        <a href="#" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown"
-                            aria-expanded="false">Shop By Brand</a>
+                        <a href="#" class="pf-cat-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Shop
+                            By Brand</a>
                         <div class="dropdown-menu pf-megamenu pf-megamenu--single shadow-lg border-0 p-4">
                             <a href="{{ url('/brandlist') }}" class="text-decoration-none">
                                 <p class="pf-megamenu__heading">Shop By Brand</p>
@@ -290,7 +293,8 @@ SITE HEADER WRAPPER (sticky, two rows)
                                 @endforeach
                                 @if(count($brandList) > 12)
                                     <li>
-                                        <a class="pf-megamenu__more-link" href="{{ url('/brandlist') }}">+ View All ({{ count($brandList) }})</a>
+                                        <a class="pf-megamenu__more-link" href="{{ url('/brandlist') }}">+ View All
+                                            ({{ count($brandList) }})</a>
                                     </li>
                                 @endif
                             </ul>
@@ -298,7 +302,8 @@ SITE HEADER WRAPPER (sticky, two rows)
                     </li>
                 @endif
                 <li class="pf-cat-item">
-                    <a href="{{ route('blog.index') }}" class="pf-cat-link {{ request()->routeIs('blog.*') ? 'active' : '' }}">Blog</a>
+                    <a href="{{ route('blog.index') }}"
+                        class="pf-cat-link {{ request()->routeIs('blog.*') ? 'active' : '' }}">Blog</a>
                 </li>
             </ul>
         </div>
