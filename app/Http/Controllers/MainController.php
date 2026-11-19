@@ -12,8 +12,8 @@ class MainController extends Controller
     public function home(): View
     {
         $meta = [
-            'title' => 'Flower & Gift Delivery Online',
-            'description' => 'Order fresh flowers, cakes, and gifts online with same-day delivery.',
+            'title' => 'Himalayan Wellness Products | Mad Honey & Shilajit',
+            'description' => 'Discover Nepal\'s Himalayan wellness treasures: Mad Honey, Shilajit, Yarsha Gumba, Rudraksha, herbs and spices, alongside Indian wellness products online.',
         ];
 
         $productRows = [];
